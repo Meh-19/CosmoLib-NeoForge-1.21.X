@@ -23,7 +23,7 @@ public final class CosmoLibCreativeTabs {
                     .displayItems((params, output) -> {
                         output.accept(CosmoLibItems.PAINTING_TABLE.get());
                         output.accept(CosmoLibItems.PAINTBRUSH.get());
-                        output.accept(CosmoLibItems.TEST_HAT.get());
+                        output.accept(CosmoLibItems.COSMO_HAT.get());
                     })
                     .build());
 
