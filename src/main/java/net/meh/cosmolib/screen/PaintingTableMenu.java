@@ -173,7 +173,28 @@ public class PaintingTableMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }
+    public ItemStack quickMoveStack(Player player, int index) {
+        Slot slot = slots.get(index);
+        if (!slot.hasItem()) return ItemStack.EMPTY;
+        ItemStack stack    = slot.getItem();
+        ItemStack original = stack.copy();
+
+        if (index == 1) {
+            // Output → player inventory (reverse so hotbar is tried last)
+            if (!moveItemStackTo(stack, 2, slots.size(), true)) return ItemStack.EMPTY;
+        } else if (index == 0) {
+            // Input → player inventory
+            if (!moveItemStackTo(stack, 2, slots.size(), true)) return ItemStack.EMPTY;
+        } else {
+            // Player inventory → input slot (only if paintable)
+            if (!isPaintable(stack)) return ItemStack.EMPTY;
+            if (!moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY;
+        }
+
+        if (stack.isEmpty()) slot.set(ItemStack.EMPTY);
+        else slot.setChanged();
+        return original;
+    }
 
     @Override
     public boolean stillValid(Player player) { return true; }

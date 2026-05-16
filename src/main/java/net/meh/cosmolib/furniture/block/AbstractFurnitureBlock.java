@@ -2,10 +2,16 @@ package net.meh.cosmolib.furniture.block;
 
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
 import net.meh.cosmolib.paint.PaintData;
+import net.meh.cosmolib.tag.CosmoLibTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
@@ -18,6 +24,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Base class for all CosmoLib furniture blocks.
@@ -48,6 +56,18 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
         builder.add(ROTATION, FRAGILE);
+    }
+
+    private static final ResourceLocation COSMOLIB_FONT =
+            ResourceLocation.fromNamespaceAndPath("cosmolib", "default");
+
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context,
+                                List<Component> tooltip, TooltipFlag flag) {
+        if (defaultBlockState().is(CosmoLibTags.Blocks.PAINTABLE)) {
+            tooltip.add(Component.literal("ꑞ")
+                    .withStyle(Style.EMPTY.withFont(COSMOLIB_FONT)));
+        }
     }
 
     @Override
