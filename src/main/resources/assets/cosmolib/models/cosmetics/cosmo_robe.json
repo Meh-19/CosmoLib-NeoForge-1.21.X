@@ -2,8 +2,8 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "cosmolib:cosmetics/cosmo_base",
-		"particle": "cosmolib:cosmetics/cosmo_base"
+		"0": "cosmolib:item/cosmo_base",
+		"particle": "cosmolib:item/cosmo_base"
 	},
 	"elements": [
 		{

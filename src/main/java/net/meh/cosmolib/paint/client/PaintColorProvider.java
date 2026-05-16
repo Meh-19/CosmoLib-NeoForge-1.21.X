@@ -16,7 +16,7 @@ public final class PaintColorProvider implements ItemColor {
 
     @Override
     public int getColor(ItemStack stack, int tintIndex) {
-        if (tintIndex != 1) return -1;
+        if (tintIndex != 0) return -1;
         return PaintFinish.getArgbTint(stack);
     }
 }

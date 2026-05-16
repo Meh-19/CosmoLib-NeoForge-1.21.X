@@ -48,6 +48,8 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
             poseStack.mulPose(Axis.ZP.rotationDegrees(rot * 45.0f));
         }
 
+        poseStack.scale(0.5f, 0.5f, 0.5f);
+
         Minecraft.getInstance().getItemRenderer().renderStatic(
                 stack,
                 ItemDisplayContext.FIXED,

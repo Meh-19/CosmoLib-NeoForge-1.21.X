@@ -1,6 +1,1 @@
-{
-  "sources": [
-    { "type": "single", "resource": "cosmolib:cosmetics/cosmo_base" },
-    { "type": "single", "resource": "cosmolib:furniture/cosmo_rug" }
-  ]
-}
+{ "sources": [] }
