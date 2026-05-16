@@ -71,7 +71,7 @@ public class CosmoLib {
         event.enqueueWork(() -> {
             CosmeticRegistry.register(CosmoLibItems.COSMO_HAT.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_ROBE.get(), true);
-            CosmeticRegistry.register(CosmoLibItems.COSMO_STAFF.get(), true);
+            CosmeticRegistry.register(CosmoLibItems.COSMO_CANE.get(), true);
         });
     }
 }

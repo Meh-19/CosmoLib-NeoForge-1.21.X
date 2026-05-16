@@ -87,6 +87,6 @@ public final class ClientEventHandler {
                 CosmoLibItems.PAINTBRUSH.get(),
                 CosmoLibItems.COSMO_HAT.get(),
                 CosmoLibItems.COSMO_ROBE.get(),
-                CosmoLibItems.COSMO_STAFF.get());
+                CosmoLibItems.COSMO_CANE.get());
     }
 }

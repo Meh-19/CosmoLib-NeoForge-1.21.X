@@ -48,8 +48,8 @@ public final class CosmoLibItems {
                     new Item.Properties()
             ));
 
-    public static final DeferredItem<CosmeticItem> COSMO_STAFF =
-            ITEMS.register("cosmo_staff", () -> new CosmeticItem(
+    public static final DeferredItem<CosmeticItem> COSMO_CANE =
+            ITEMS.register("cosmo_cane", () -> new CosmeticItem(
                     CosmeticSlot.HAND,
                     CosmeticRarity.COMMON,
                     false,
