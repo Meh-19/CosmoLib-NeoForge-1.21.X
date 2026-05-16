@@ -1,6 +1,7 @@
 package net.meh.cosmolib.registry;
 
 import net.meh.cosmolib.block.PaintingTableBlock;
+import net.meh.cosmolib.furniture.block.DecorationBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -17,6 +18,14 @@ public final class CosmoLibBlocks {
             BLOCKS.register("painting_table", () -> new PaintingTableBlock(
                     BlockBehaviour.Properties.of()
                             .strength(2.5f)
+                            .sound(SoundType.WOOD)
+                            .noOcclusion()
+            ));
+
+    public static final DeferredBlock<DecorationBlock> COSMO_RUG =
+            BLOCKS.register("cosmo_rug", () -> new DecorationBlock(
+                    BlockBehaviour.Properties.of()
+                            .strength(1.5f)
                             .sound(SoundType.WOOD)
                             .noOcclusion()
             ));

@@ -1,0 +1,4 @@
+#define PI  (3.141592654)
+#define TWO_PI (6.283185307)
+
+vec2 rotate(vec2 v,float a){float s=sin(a);float c=cos(a);mat2 m=mat2(c,-s,s,c);return m*v;}float noise11(float p){return fract(sin(p*12.9898)*43758.547);}float noise21(vec2 p){return fract(sin(dot(p,vec2(12.9898,4.1414)))*43758.547);}vec2 noise22(vec2 p){return fract(vec2(noise21(p),noise21(p+232.245)));}vec3 noise23(vec2 p){return fract(vec3(noise21(p),noise21(p+232.245),noise21(p+345.768)));}vec4 texture2D_bilinear(in sampler2D t,in vec2 uv,in vec2 textureSize,in vec2 texelSize){vec2 f=fract(uv*textureSize);uv+=(0.5-f)*texelSize;vec4 tl=texture(t,uv);vec4 tr=texture(t,uv+vec2(texelSize.x,0.));vec4 bl=texture(t,uv+vec2(0.,texelSize.y));vec4 br=texture(t,uv+vec2(texelSize.x,texelSize.y));vec4 tA=mix(tl,tr,f.x);vec4 tB=mix(bl,br,f.x);return mix(tA,tB,1.-(1.-f.y)*(1.-f.y));}

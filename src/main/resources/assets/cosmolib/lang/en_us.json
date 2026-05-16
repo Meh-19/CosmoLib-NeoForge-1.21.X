@@ -5,7 +5,10 @@
   "block.cosmolib.painting_table": "Painting Table",
 
   "item.cosmolib.paintbrush": "Paintbrush",
-  "item.cosmolib.test_hat": "Test Hat",
+  "item.cosmolib.cosmo_hat": "Cosmo Hat",
+  "item.cosmolib.cosmo_robe": "Cosmo Robe",
+  "item.cosmolib.cosmo_staff": "Cosmo Staff",
+  "block.cosmolib.cosmo_rug": "Cosmo Rug",
 
   "container.cosmolib.painting_table": "Painting Table",
   "container.cosmolib.cosmetics": "Cosmetics",

@@ -13,6 +13,7 @@ import net.meh.cosmolib.registry.CosmoLibMenuTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -45,7 +46,7 @@ public final class ClientEventHandler {
     @SubscribeEvent
     public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
         Minecraft mc = Minecraft.getInstance();
-        for (String skin : event.getSkins()) {
+        for (PlayerSkin.Model skin : event.getSkins()) {
             var renderer = event.getSkin(skin);
             if (renderer instanceof PlayerRenderer pr) {
                 pr.addLayer(new CosmeticPlayerLayer(pr, mc.getItemRenderer()));
@@ -84,6 +85,8 @@ public final class ClientEventHandler {
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
         event.register(PaintColorProvider.INSTANCE,
                 CosmoLibItems.PAINTBRUSH.get(),
-                CosmoLibItems.TEST_HAT.get());
+                CosmoLibItems.COSMO_HAT.get(),
+                CosmoLibItems.COSMO_ROBE.get(),
+                CosmoLibItems.COSMO_STAFF.get());
     }
 }

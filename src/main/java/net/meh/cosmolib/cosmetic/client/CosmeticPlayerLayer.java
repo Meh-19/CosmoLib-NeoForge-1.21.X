@@ -8,9 +8,9 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.item.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -108,7 +108,7 @@ public class CosmeticPlayerLayer
                 Minecraft.getInstance().level,
                 null, 0
         );
-        itemRenderer.renderItem(stack, ctx, leftHand, ps, buf, light,
+        itemRenderer.render(stack, ctx, leftHand, ps, buf, light,
                 net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, model);
     }
 }

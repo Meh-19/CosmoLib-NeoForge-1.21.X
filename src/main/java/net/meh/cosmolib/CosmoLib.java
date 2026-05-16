@@ -33,8 +33,8 @@ import net.neoforged.fml.common.Mod;
  *      {@link net.meh.cosmolib.furniture.block.WallFurnitureBlock}, or
  *      {@link net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock}) for your block.
  *  6.  Register a {@link net.minecraft.world.level.block.entity.BlockEntityType} whose
- *      factory is {@link net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity#new}
- *      (or {@link net.meh.cosmolib.furniture.blockentity.AnimatedFurnitureBlockEntity#new}
+ *      factory is {@link net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity}
+ *      (or {@link net.meh.cosmolib.furniture.blockentity.AnimatedFurnitureBlockEntity}
  *       for animated pieces).
  *  7.  In your client setup, call:
  *        event.registerBlockEntityRenderer(MY_FURNITURE_BE.get(),
@@ -68,7 +68,10 @@ public class CosmoLib {
     }
 
     private void onSetup(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent event) {
-        event.enqueueWork(() ->
-                CosmeticRegistry.register(CosmoLibItems.TEST_HAT.get(), true));
+        event.enqueueWork(() -> {
+            CosmeticRegistry.register(CosmoLibItems.COSMO_HAT.get(), true);
+            CosmeticRegistry.register(CosmoLibItems.COSMO_ROBE.get(), true);
+            CosmeticRegistry.register(CosmoLibItems.COSMO_STAFF.get(), true);
+        });
     }
 }
