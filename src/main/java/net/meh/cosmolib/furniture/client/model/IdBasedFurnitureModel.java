@@ -28,7 +28,7 @@ public class IdBasedFurnitureModel<T extends FurnitureBlockEntity> extends GeoMo
     public ResourceLocation getTextureResource(T animatable) {
         ResourceLocation id = BuiltInRegistries.BLOCK.getKey(animatable.getBlockState().getBlock());
         return ResourceLocation.fromNamespaceAndPath(id.getNamespace(),
-                "textures/block/" + id.getPath() + ".png");
+                "textures/furniture/" + id.getPath() + ".png");
     }
 
     @Override

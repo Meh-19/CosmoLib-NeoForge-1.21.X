@@ -2,49 +2,49 @@
   "providers": [
     {
       "type": "bitmap",
-      "file": "argon:gui/lore_common.png",
+      "file": "cosmolib:gui/lore_common.png",
       "ascent": 7,
       "height": 7,
       "chars": ["ꑲ"]
     },
     {
       "type": "bitmap",
-      "file": "argon:gui/lore_rare.png",
+      "file": "cosmolib:gui/lore_rare.png",
       "ascent": 7,
       "height": 7,
       "chars": ["ꑳ"]
     },
     {
       "type": "bitmap",
-      "file": "argon:gui/lore_epic.png",
+      "file": "cosmolib:gui/lore_epic.png",
       "ascent": 7,
       "height": 7,
       "chars": ["ꑴ"]
     },
     {
       "type": "bitmap",
-      "file": "argon:gui/lore_legendary.png",
+      "file": "cosmolib:gui/lore_legendary.png",
       "ascent": 7,
       "height": 7,
       "chars": ["ꑵ"]
     },
     {
       "type": "bitmap",
-      "file": "argon:gui/lore_limited.png",
+      "file": "cosmolib:gui/lore_limited.png",
       "ascent": 7,
       "height": 7,
       "chars": ["ꑶ"]
     },
     {
       "type": "bitmap",
-      "file": "argon:gui/lore_paintable.png",
+      "file": "cosmolib:gui/lore_paintable.png",
       "ascent": 7,
       "height": 7,
       "chars": ["ꑞ"]
     },
     {
       "type": "bitmap",
-      "file": "argon:gui/lore_fragment.png",
+      "file": "cosmolib:gui/lore_fragment.png",
       "ascent": 7,
       "height": 7,
       "chars": ["ꑨ"]

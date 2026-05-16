@@ -24,14 +24,14 @@ public record EquipCosmeticPayload(
                 @Override
                 public EquipCosmeticPayload decode(RegistryFriendlyByteBuf buf) {
                     CosmeticSlot slot  = CosmeticSlot.values()[buf.readVarInt()];
-                    ItemStack    stack = ItemStack.STREAM_CODEC.decode(buf);
+                    ItemStack    stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
                     return new EquipCosmeticPayload(slot, stack);
                 }
 
                 @Override
                 public void encode(RegistryFriendlyByteBuf buf, EquipCosmeticPayload value) {
                     buf.writeVarInt(value.slot().ordinal());
-                    ItemStack.STREAM_CODEC.encode(buf, value.stack());
+                    ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, value.stack());
                 }
             };
 
