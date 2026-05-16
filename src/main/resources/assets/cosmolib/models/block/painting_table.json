@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/orientable_with_bottom",
   "textures": {
-    "all": "cosmolib:block/painting_table"
+    "bottom": "cosmolib:block/painting_table_bottom",
+    "front": "cosmolib:block/painting_table_front",
+    "side": "cosmolib:block/painting_table_side",
+    "top": "cosmolib:block/painting_table_top"
   }
 }

@@ -14,22 +14,10 @@ public final class CosmoLibBlockEntityTypes {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MOD_ID);
 
-    /**
-     * Generic static furniture block entity — used by {@link net.meh.cosmolib.furniture.block.DecorationBlock},
-     * {@link net.meh.cosmolib.furniture.block.SittableBlock}, and {@link net.meh.cosmolib.furniture.block.WallFurnitureBlock}.
-     *
-     * Dependent mods may also register their own types that use {@link FurnitureBlockEntity} as the impl.
-     */
-    /**
-     * Pass no blocks here — dependent mods register their own block entity types
-     * using FurnitureBlockEntity::new and list their specific blocks there.
-     * This type is used as a fallback by DecorationBlock/SittableBlock/WallFurnitureBlock
-     * when no custom type is provided.
-     */
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FurnitureBlockEntity>>
             FURNITURE_ENTITY = BLOCK_ENTITY_TYPES.register("furniture_entity",
             () -> BlockEntityType.Builder
-                    .of(FurnitureBlockEntity::new)
+                    .of(FurnitureBlockEntity::new, CosmoLibBlocks.COSMO_RUG.get())
                     .build(null));
 
     /**
