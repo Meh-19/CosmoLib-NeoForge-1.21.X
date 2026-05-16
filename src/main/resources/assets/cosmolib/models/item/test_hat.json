@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "cosmolib:item/test_hat",
+    "layer1": "cosmolib:item/test_hat_overlay"
+  }
+}

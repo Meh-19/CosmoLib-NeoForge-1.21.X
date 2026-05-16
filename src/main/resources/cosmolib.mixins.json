@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.meh.cosmolib.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "HumanoidArmorLayerMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pickn\\\\Downloads\\\\argon-1.21.X\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(ConvertTo-Json -Depth 100)",
+      "PowerShell(head -100)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\.claude\\\\worktrees\\\\infallible-liskov-ec91bd\\\\src\\\\main\\\\java\\\\com\" -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item -Force \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\.claude\\\\worktrees\\\\infallible-liskov-ec91bd\\\\src\\\\main\\\\resources\\\\assets\\\\examplemod\\\\lang\\\\en_us.json\" -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\.claude\\\\worktrees\\\\infallible-liskov-ec91bd\\\\src\\\\main\\\\resources\\\\assets\\\\examplemod\" -ErrorAction SilentlyContinue)"
+    ]
+  }
+}

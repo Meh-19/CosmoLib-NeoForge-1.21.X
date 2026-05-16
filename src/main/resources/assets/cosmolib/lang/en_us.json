@@ -1,0 +1,15 @@
+{
+  "itemGroup.cosmolib": "CosmoLib",
+  "itemGroup.cosmolib.cosmetics": "Cosmetics",
+
+  "block.cosmolib.painting_table": "Painting Table",
+
+  "item.cosmolib.paintbrush": "Paintbrush",
+  "item.cosmolib.test_hat": "Test Hat",
+
+  "container.cosmolib.painting_table": "Painting Table",
+  "container.cosmolib.cosmetics": "Cosmetics",
+
+  "key.cosmolib.open_cosmetics": "Open Cosmetics",
+  "key.categories.cosmolib": "CosmoLib"
+}
