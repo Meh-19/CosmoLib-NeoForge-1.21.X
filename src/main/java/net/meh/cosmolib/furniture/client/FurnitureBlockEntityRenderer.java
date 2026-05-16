@@ -1,64 +1,64 @@
 package net.meh.cosmolib.furniture.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.meh.cosmolib.furniture.block.AbstractFurnitureBlock;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
-import net.meh.cosmolib.furniture.client.model.IdBasedFurnitureModel;
-import net.meh.cosmolib.paint.PaintFinish;
+import net.meh.cosmolib.paint.PaintData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import software.bernie.geckolib.renderer.GeoBlockRenderer;
-import software.bernie.geckolib.util.Color;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Renderer for all CosmoLib furniture block entities.
+ * Renders static furniture by drawing the block's own item model via ItemRenderer.
  *
- * Uses {@link IdBasedFurnitureModel} to auto-resolve the GeckoLib geo, texture,
- * and animation files from the block's registry ID.
+ * The block is laid flat on the ground (FLOOR mode), respecting the ROTATION
+ * block state property. Paint color is applied via PaintData before rendering.
  *
- * Paint tinting is applied via {@link #getRenderColor}: the magic ARGB value
- * from {@link PaintFinish} triggers the finish shader if present, otherwise it
- * applies a solid colour tint.
- *
- * Register this for your block entity type in client setup:
- * <pre>{@code
- * event.registerBlockEntityRenderer(MY_FURNITURE_BE.get(),
- *     ctx -> new FurnitureBlockEntityRenderer(ctx));
- * }</pre>
+ * No GeckoLib required — animated furniture uses AnimatedFurnitureBlockEntityRenderer.
  */
-public class FurnitureBlockEntityRenderer extends GeoBlockRenderer<FurnitureBlockEntity> {
+public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<FurnitureBlockEntity> {
 
-    public FurnitureBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
-        super(new IdBasedFurnitureModel<>());
-    }
-
-    @Override
-    public Color getRenderColor(FurnitureBlockEntity animatable, float partialTick, int packedLight) {
-        int color = animatable.getPaintColor();
-        if (color >= 0) {
-            return new Color(PaintFinish.getArgbTintFromRaw(color));
-        }
-        return Color.WHITE;
-    }
+    public FurnitureBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
     public void render(FurnitureBlockEntity entity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        // Apply block rotation from the ROTATION block state property
+        if (entity.getLevel() == null) return;
+
+        BlockState state = entity.getBlockState();
+        ItemStack stack = new ItemStack(state.getBlock().asItem());
+        if (stack.isEmpty()) return;
+
+        int paintColor = entity.getPaintColor();
+        if (paintColor >= 0) PaintData.applyColor(stack, paintColor);
+
         poseStack.pushPose();
-        applyBlockRotation(entity, poseStack);
-        super.render(entity, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
-        poseStack.popPose();
-    }
-
-    private void applyBlockRotation(FurnitureBlockEntity entity, PoseStack poseStack) {
-        net.minecraft.world.level.block.state.BlockState state = entity.getBlockState();
-        if (!state.hasProperty(net.meh.cosmolib.furniture.block.AbstractFurnitureBlock.ROTATION)) return;
-
-        int rot = state.getValue(net.meh.cosmolib.furniture.block.AbstractFurnitureBlock.ROTATION);
-        float degrees = rot * 45.0f;
 
         poseStack.translate(0.5, 0.0, 0.5);
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-degrees));
-        poseStack.translate(-0.5, 0.0, -0.5);
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
+
+        if (state.hasProperty(AbstractFurnitureBlock.ROTATION)) {
+            int rot = state.getValue(AbstractFurnitureBlock.ROTATION);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(rot * 45.0f));
+        }
+
+        Minecraft.getInstance().getItemRenderer().renderItem(
+                stack,
+                ItemDisplayContext.FIXED,
+                packedLight,
+                packedOverlay,
+                poseStack,
+                bufferSource,
+                entity.getLevel(),
+                0
+        );
+
+        poseStack.popPose();
     }
 }

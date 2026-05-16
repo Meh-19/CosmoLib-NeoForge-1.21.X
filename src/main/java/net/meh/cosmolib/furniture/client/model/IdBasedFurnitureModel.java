@@ -1,6 +1,6 @@
 package net.meh.cosmolib.furniture.client.model;
 
-import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
+import net.meh.cosmolib.furniture.blockentity.AnimatedFurnitureBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
@@ -10,12 +10,10 @@ import software.bernie.geckolib.model.GeoModel;
  *
  * Given a block registered as {@code mymod:my_clock} the loader expects:
  *   geo:        assets/mymod/geo/block/my_clock.geo.json
- *   texture:    assets/mymod/textures/block/my_clock.png
+ *   texture:    assets/mymod/textures/furniture/my_clock.png
  *   animation:  assets/mymod/animations/block/my_clock.animation.json
- *
- * Static furniture (no animation) just needs the geo + texture files.
  */
-public class IdBasedFurnitureModel<T extends FurnitureBlockEntity> extends GeoModel<T> {
+public class IdBasedFurnitureModel<T extends AnimatedFurnitureBlockEntity> extends GeoModel<T> {
 
     @Override
     public ResourceLocation getModelResource(T animatable) {

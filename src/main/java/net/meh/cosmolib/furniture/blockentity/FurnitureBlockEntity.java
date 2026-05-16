@@ -7,21 +7,19 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
  * Base block entity for all static furniture blocks.
- * Stores the paint color (-1 = unpainted) and is extended by animated furniture.
+ * Stores the paint color (-1 = unpainted).
+ *
+ * Rendering is handled by {@link net.meh.cosmolib.furniture.client.FurnitureBlockEntityRenderer}
+ * which uses the vanilla ItemRenderer — no GeckoLib required for static pieces.
  */
-public class FurnitureBlockEntity extends BlockEntity implements GeoBlockEntity {
+public class FurnitureBlockEntity extends BlockEntity {
 
     private static final String TAG_PAINT_COLOR = "PaintColor";
 
     private int paintColor = -1;
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     /** Used by CosmoLib's own FURNITURE_ENTITY type registration. */
     public FurnitureBlockEntity(BlockPos pos, BlockState state) {
@@ -31,18 +29,6 @@ public class FurnitureBlockEntity extends BlockEntity implements GeoBlockEntity 
     /** Used by AnimatedFurnitureBlockEntity and dependent mods that register their own type. */
     public FurnitureBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-    }
-
-    // ------------------------------------------------------------------
-    // GeoBlockEntity — static furniture plays no animations
-    // ------------------------------------------------------------------
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar registrar) {}
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
     }
 
     // ------------------------------------------------------------------

@@ -5,6 +5,7 @@ import net.meh.cosmolib.cosmetic.client.CosmeticPlayerLayer;
 import net.meh.cosmolib.cosmetic.screen.CosmeticScreen;
 import net.meh.cosmolib.cosmetic.network.OpenCosmeticScreenPayload;
 import net.meh.cosmolib.cosmetic.screen.CosmeticMenu;
+import net.meh.cosmolib.furniture.client.AnimatedFurnitureBlockEntityRenderer;
 import net.meh.cosmolib.furniture.client.FurnitureBlockEntityRenderer;
 import net.meh.cosmolib.paint.client.PaintColorProvider;
 import net.meh.cosmolib.registry.CosmoLibBlockEntityTypes;
@@ -64,7 +65,7 @@ public final class ClientEventHandler {
                 FurnitureBlockEntityRenderer::new);
         event.registerBlockEntityRenderer(
                 CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get(),
-                FurnitureBlockEntityRenderer::new);
+                AnimatedFurnitureBlockEntityRenderer::new);
     }
 
     // ------------------------------------------------------------------
