@@ -27,20 +27,19 @@ public class CosmeticMenu extends AbstractContainerMenu {
     public CosmeticMenu(int containerId, Inventory playerInventory) {
         super(CosmoLibMenuTypes.COSMETIC_SCREEN.get(), containerId);
 
-        // Cosmetic slots (virtual display slots)
-        for (CosmeticSlot cs : CosmeticSlot.values()) {
-            int index = cs.getIndex();
-            addSlot(new CosmeticEquipSlot(cosmeticContainer, index, 80, 18 + index * 22, cs));
-        }
+        // Cosmetic slots — positions match cosmetics.png texture
+        addSlot(new CosmeticEquipSlot(cosmeticContainer, 0, 17, 10,  CosmeticSlot.HAT));
+        addSlot(new CosmeticEquipSlot(cosmeticContainer, 1, 17, 52,  CosmeticSlot.BACK));
+        addSlot(new CosmeticEquipSlot(cosmeticContainer, 2, 17, 94,  CosmeticSlot.HAND));
 
         // Player inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 103 + row * 18));
+                addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 119 + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInventory, col, 8 + col * 18, 161));
+            addSlot(new Slot(playerInventory, col, 8 + col * 18, 177));
         }
     }
 
