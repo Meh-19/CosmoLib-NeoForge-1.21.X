@@ -48,7 +48,7 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
             poseStack.mulPose(Axis.ZP.rotationDegrees(rot * 45.0f));
         }
 
-        Minecraft.getInstance().getItemRenderer().renderItem(
+        Minecraft.getInstance().getItemRenderer().renderStatic(
                 stack,
                 ItemDisplayContext.FIXED,
                 packedLight,
