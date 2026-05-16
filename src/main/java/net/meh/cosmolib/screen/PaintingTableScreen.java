@@ -129,7 +129,7 @@ public class PaintingTableScreen extends AbstractContainerScreen<PaintingTableMe
         }
 
         @Override
-        public void onPress() { onClick.run(); }
+        public void onClick(double mouseX, double mouseY) { onClick.run(); }
 
         @Override
         protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput neo) {}
@@ -166,7 +166,7 @@ public class PaintingTableScreen extends AbstractContainerScreen<PaintingTableMe
         }
 
         @Override
-        public void onPress() { onClick.run(); }
+        public void onClick(double mouseX, double mouseY) { onClick.run(); }
 
         @Override
         protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput neo) {}

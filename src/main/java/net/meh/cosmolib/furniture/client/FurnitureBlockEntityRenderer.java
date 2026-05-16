@@ -7,6 +7,7 @@ import net.meh.cosmolib.paint.PaintFinish;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
+import software.bernie.geckolib.util.Color;
 
 /**
  * Renderer for all CosmoLib furniture block entities.
@@ -31,12 +32,12 @@ public class FurnitureBlockEntityRenderer extends GeoBlockRenderer<FurnitureBloc
     }
 
     @Override
-    public int getRenderColor(FurnitureBlockEntity animatable, float partialTick, int packedLight) {
+    public Color getRenderColor(FurnitureBlockEntity animatable, float partialTick, int packedLight) {
         int color = animatable.getPaintColor();
         if (color >= 0) {
-            return PaintFinish.getArgbTintFromRaw(color);
+            return new Color(PaintFinish.getArgbTintFromRaw(color));
         }
-        return 0xFFFFFFFF;
+        return Color.WHITE;
     }
 
     @Override
