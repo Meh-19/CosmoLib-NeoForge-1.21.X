@@ -1,8 +1,11 @@
 package net.meh.cosmolib.furniture.block;
 
 import com.mojang.serialization.MapCodec;
+import net.meh.cosmolib.furniture.FurnitureOptions;
+import net.meh.cosmolib.furniture.FurnitureShape;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
 import net.meh.cosmolib.registry.CosmoLibBlockEntityTypes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -35,8 +38,24 @@ public class DecorationBlock extends AbstractFurnitureBlock {
 
     public static final MapCodec<DecorationBlock> CODEC = simpleCodec(DecorationBlock::new);
 
+    /** Defaults: {@link FurnitureShape#FULL}, no fragile, no waterloggable. */
     public DecorationBlock(BlockBehaviour.Properties props) {
         super(props);
+    }
+
+    /** Explicit shape; no fragile, no waterloggable. */
+    public DecorationBlock(BlockBehaviour.Properties props, FurnitureShape shape) {
+        super(props, shape);
+    }
+
+    /** {@link FurnitureShape#FULL} with explicit options. */
+    public DecorationBlock(BlockBehaviour.Properties props, FurnitureOptions opts) {
+        super(props, opts);
+    }
+
+    /** Full constructor — shape + options. */
+    public DecorationBlock(BlockBehaviour.Properties props, FurnitureShape shape, FurnitureOptions opts) {
+        super(props, shape, opts);
     }
 
     @Override

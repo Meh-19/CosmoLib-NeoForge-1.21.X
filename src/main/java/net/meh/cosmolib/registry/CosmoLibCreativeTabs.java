@@ -24,6 +24,7 @@ public final class CosmoLibCreativeTabs {
                         output.accept(CosmoLibItems.PAINTING_TABLE.get());
                         output.accept(CosmoLibItems.PAINTBRUSH.get());
                         output.accept(CosmoLibItems.COSMO_RUG.get());
+                        output.accept(CosmoLibItems.AGED_FLAG.get());
                     })
                     .build());
 

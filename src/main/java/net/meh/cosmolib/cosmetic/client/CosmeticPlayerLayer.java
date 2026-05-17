@@ -1,5 +1,6 @@
 package net.meh.cosmolib.cosmetic.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.meh.cosmolib.cosmetic.CosmeticSlot;
@@ -12,12 +13,17 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class CosmeticPlayerLayer
         extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+
+    /** Finish atlas — must be bound to Sampler3 before any finish-enabled item is rendered. */
+    private static final ResourceLocation FINISH_ATLAS =
+            ResourceLocation.fromNamespaceAndPath("cosmolib", "textures/misc/finish_atlas.png");
 
     private final ItemRenderer itemRenderer;
 
@@ -40,6 +46,12 @@ public class CosmeticPlayerLayer
         ItemStack hat  = CosmeticClientCache.getEquipped(entity, CosmeticSlot.HAT);
         ItemStack back = CosmeticClientCache.getEquipped(entity, CosmeticSlot.BACK);
         ItemStack hand = CosmeticClientCache.getEquipped(entity, CosmeticSlot.HAND);
+
+        if (hat.isEmpty() && back.isEmpty() && hand.isEmpty()) return;
+
+        // Bind the finish atlas to Sampler3 so the entity shader's finishGet() can
+        // sample it.  Must be set before any renderItem() call that might carry a finish.
+        RenderSystem.setShaderTexture(3, FINISH_ATLAS);
 
         if (!hat.isEmpty())  renderHat (poseStack, bufferSource, packedLight, entity, hat);
         if (!back.isEmpty()) renderBack(poseStack, bufferSource, packedLight, entity, back);
@@ -66,10 +78,13 @@ public class CosmeticPlayerLayer
     // BACK
     // ------------------------------------------------------------------
     private void renderBack(PoseStack ps, MultiBufferSource buf, int light,
-                             AbstractClientPlayer entity, ItemStack stack) {
+                            AbstractClientPlayer entity, ItemStack stack) {
         ps.pushPose();
         getParentModel().body.translateAndRotate(ps);
-        ps.translate(0.0, -0.4 - 2.0 - 0.03125 - 0.0625, 0.25 - 0.1875 - 0.0625);
+
+        // Y-axis updated from -3.49375 to -0.57625 to move it down 46.68 Blockbench units
+        ps.translate(0.0, -0.57625, 0.25 - 0.1875 - 0.0625);
+
         ps.mulPose(Axis.XP.rotationDegrees(180));
         ps.mulPose(Axis.YP.rotationDegrees(180));
         ps.scale(0.75f, 0.75f, 0.75f);

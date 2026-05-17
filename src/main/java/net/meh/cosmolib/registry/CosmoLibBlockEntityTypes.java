@@ -22,11 +22,13 @@ public final class CosmoLibBlockEntityTypes {
 
     /**
      * Animated furniture block entity — used by {@link net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock}.
+     * All animated furniture blocks must be listed here.
      */
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AnimatedFurnitureBlockEntity>>
             ANIMATED_FURNITURE_ENTITY = BLOCK_ENTITY_TYPES.register("animated_furniture_entity",
             () -> BlockEntityType.Builder
-                    .of(AnimatedFurnitureBlockEntity::new)
+                    .of(AnimatedFurnitureBlockEntity::new,
+                            CosmoLibBlocks.AGED_FLAG.get())
                     .build(null));
 
     private CosmoLibBlockEntityTypes() {}

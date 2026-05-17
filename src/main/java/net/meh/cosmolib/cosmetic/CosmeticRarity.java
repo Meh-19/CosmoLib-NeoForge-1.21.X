@@ -2,10 +2,10 @@ package net.meh.cosmolib.cosmetic;
 
 public enum CosmeticRarity {
     COMMON   ("ꑲ", 0xAAAAAA),
-    RARE     ("ꑳ", 0x5599FF),
-    EPIC     ("ꑴ", 0xCC44CC),
-    LEGENDARY("ꑵ", 0xFFAA00),
-    LIMITED  ("ꑶ", 0xFF5555);
+    RARE     ("ꑳ", 0x0099DB),
+    EPIC     ("ꑴ", 0x8B5CF6),
+    LEGENDARY("ꑵ", 0xF49E0B),
+    LIMITED  ("ꑶ", 0x7EBE1B);
 
     private final String symbol;
     private final int    color;

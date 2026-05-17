@@ -1,39 +1,49 @@
 package net.meh.cosmolib.paint;
 
 /**
- * The 14 animated paint finishes driven by the entity shader system.
+ * The animated paint finishes driven by the entity shader system.
  *
  * Encoding: the shader detects a vertex colour where R=1.0, B=1.0, and G
  * encodes the finish ID:  G = (id - 1) * 2 / 255.0  (normalised).
- * Packed int: 0xFF_FF_gg_FF  where gg = (id - 1) * 2.
+ * Packed int: 0xFF_gg_FF  where gg = (id - 1) * 2.
+ *
+ * UI display order is defined by {@link net.meh.cosmolib.screen.PaintingTableMenu#FINISH_DISPLAY_ORDER}.
  */
 public enum FinishType {
 
-    RAINBOW (1,  "Rainbow"),
-    PIXEL   (2,  "Pixel"),
-    GALAXY  (3,  "Galaxy"),
-    MAGMA   (4,  "Magma"),
-    OCEAN   (5,  "Ocean"),
-    FLOWER  (6,  "Flower"),
-    MATRIX  (7,  "Matrix"),
-    CHROME  (8,  "Chrome"),
-    GLITCH  (9,  "Glitch"),
-    TILE    (10, "Tile"),
-    CRATE   (11, "Crate"),
-    PEARL   (12, "Pearl"),
-    PHANTOM (13, "Phantom"),
-    SNOW    (14, "Snow");
+    RAINBOW    (1,  "Rainbow",    0xFF4444),
+    GOLD       (2,  "Gold",       0xFFD700),
+    GALAXY     (3,  "Galaxy",     0x5500CC),
+    MOLTEN     (4,  "Molten",     0xFF4500),
+    BUBBLE     (5,  "Bubble",     0x00BFFF),
+    FLORAL     (6,  "Floral",     0xFF80C0),
+    MATRIX     (7,  "Matrix",     0x00FF41),
+    CHROME     (8,  "Chrome",     0xB8B8B8),
+    GLITCH     (9,  "Glitch",     0xFF00CC),
+    IRIDESCENT (10, "Iridescent", 0x80FFEE),
+    VOID       (11, "Void",       0x100820),
+    PEARL      (12, "Pearl",      0xFFF5E0),
+    PHANTOM    (13, "Phantom",    0x8B00FF),
+    SNOW       (14, "Snow",       0xE0F0FF);
 
     private final int    id;
     private final String displayName;
+    /** Static representative colour shown on GUI buttons (24-bit RGB). */
+    private final int    representativeColor;
 
-    FinishType(int id, String displayName) {
-        this.id          = id;
-        this.displayName = displayName;
+    FinishType(int id, String displayName, int representativeColor) {
+        this.id                 = id;
+        this.displayName        = displayName;
+        this.representativeColor = representativeColor;
     }
 
-    public int    getId()          { return id; }
-    public String getDisplayName() { return displayName; }
+    public int    getId()                  { return id; }
+    public String getDisplayName()         { return displayName; }
+    /**
+     * A thematic static colour (24-bit RGB) used to represent this finish in the
+     * GUI, where the animated entity shader cannot run.
+     */
+    public int    getRepresentativeColor() { return representativeColor; }
 
     /** ARGB tint returned to color providers to trigger the shader branch. */
     public int getMagicArgb() {

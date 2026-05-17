@@ -1,9 +1,13 @@
 package net.meh.cosmolib;
 
 import net.meh.cosmolib.cosmetic.CosmeticRegistry;
+import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
 import net.meh.cosmolib.registry.*;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CosmoLib — a shared library for cosmetics, furniture, and the painting/finish system.
@@ -52,6 +56,7 @@ import net.neoforged.fml.common.Mod;
 public class CosmoLib {
 
     public static final String MOD_ID = "cosmolib";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public CosmoLib(IEventBus modEventBus) {
         // Register all deferred registers to the mod event bus
@@ -72,6 +77,12 @@ public class CosmoLib {
             CosmeticRegistry.register(CosmoLibItems.COSMO_HAT.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_ROBE.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_CANE.get(), true);
+
+            // Example animated furniture — remove alongside CosmoLibBlocks.AGED_FLAG
+            AnimatedFurnitureBlock.registerAnimation(
+                    ResourceLocation.fromNamespaceAndPath(MOD_ID, "aged_flag"),
+                    "flag_sway"
+            );
         });
     }
 }

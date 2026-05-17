@@ -2,6 +2,11 @@
   "sources": [
     {
       "type": "directory",
+      "source": "cosmetics",
+      "prefix": "cosmetics/"
+    },
+    {
+      "type": "directory",
       "source": "furniture",
       "prefix": "furniture/"
     }

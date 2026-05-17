@@ -1,9 +1,12 @@
 package net.meh.cosmolib.registry;
 
+import net.meh.cosmolib.cosmetic.CosmeticDefault;
 import net.meh.cosmolib.cosmetic.CosmeticItem;
 import net.meh.cosmolib.cosmetic.CosmeticRarity;
 import net.meh.cosmolib.cosmetic.CosmeticSlot;
+import net.meh.cosmolib.furniture.item.FurnitureBlockItem;
 import net.meh.cosmolib.item.PaintbrushItem;
+import net.meh.cosmolib.paint.PaintColor;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -22,11 +25,11 @@ public final class CosmoLibItems {
             ITEMS.registerSimpleBlockItem("painting_table", CosmoLibBlocks.PAINTING_TABLE);
 
     // ------------------------------------------------------------------
-    // Paintbrush (max damage 128 = lasts a while but does wear down)
+    // Paintbrush — 300 uses; accepts Mending and Unbreaking via anvil
     // ------------------------------------------------------------------
     public static final DeferredItem<PaintbrushItem> PAINTBRUSH =
             ITEMS.register("paintbrush", () -> new PaintbrushItem(
-                    new Item.Properties().durability(128)
+                    new Item.Properties().durability(300)
             ));
 
     // ------------------------------------------------------------------
@@ -35,32 +38,50 @@ public final class CosmoLibItems {
     public static final DeferredItem<CosmeticItem> COSMO_HAT =
             ITEMS.register("cosmo_hat", () -> new CosmeticItem(
                     CosmeticSlot.HAT,
-                    CosmeticRarity.COMMON,
-                    false,
+                    CosmeticRarity.LIMITED,
+                    true,
+                    CosmeticDefault.color(PaintColor.LIGHT_BLUE, 7),
                     new Item.Properties()
             ));
 
     public static final DeferredItem<CosmeticItem> COSMO_ROBE =
             ITEMS.register("cosmo_robe", () -> new CosmeticItem(
                     CosmeticSlot.BACK,
-                    CosmeticRarity.COMMON,
-                    false,
+                    CosmeticRarity.LIMITED,
+                    true,
+                    CosmeticDefault.color(PaintColor.LIGHT_BLUE, 7),
                     new Item.Properties()
             ));
 
     public static final DeferredItem<CosmeticItem> COSMO_CANE =
             ITEMS.register("cosmo_cane", () -> new CosmeticItem(
                     CosmeticSlot.HAND,
-                    CosmeticRarity.COMMON,
-                    false,
+                    CosmeticRarity.LIMITED,
+                    true,
+                    CosmeticDefault.color(PaintColor.LIGHT_BLUE, 7),
                     new Item.Properties()
             ));
 
     // ------------------------------------------------------------------
-    // Test furniture block item
+    // Furniture block items — use FurnitureBlockItem to bake default color
     // ------------------------------------------------------------------
-    public static final DeferredItem<BlockItem> COSMO_RUG =
-            ITEMS.registerSimpleBlockItem("cosmo_rug", CosmoLibBlocks.COSMO_RUG);
+    public static final DeferredItem<FurnitureBlockItem> COSMO_RUG =
+            ITEMS.register("cosmo_rug", () -> new FurnitureBlockItem(
+                    CosmoLibBlocks.COSMO_RUG.get(), new Item.Properties()));
+
+    /** Example animated furniture — remove alongside {@link CosmoLibBlocks#AGED_FLAG}. */
+    public static final DeferredItem<FurnitureBlockItem> AGED_FLAG =
+            ITEMS.register("aged_flag", () -> new FurnitureBlockItem(
+                    CosmoLibBlocks.AGED_FLAG.get(), new Item.Properties()));
+
+    // ------------------------------------------------------------------
+    // Internal GUI-only item used to render finish previews in the
+    // painting table screen.  Not obtainable; never appears in-world.
+    // ------------------------------------------------------------------
+    public static final DeferredItem<Item> FINISH_PREVIEW =
+            ITEMS.register("finish_preview", () -> new Item(
+                    new Item.Properties().stacksTo(1)
+            ));
 
     private CosmoLibItems() {}
 }

@@ -1,6 +1,7 @@
 package net.meh.cosmolib.furniture.block;
 
 import com.mojang.serialization.MapCodec;
+import net.meh.cosmolib.furniture.FurnitureOptions;
 import net.meh.cosmolib.furniture.blockentity.AnimatedFurnitureBlockEntity;
 import net.meh.cosmolib.registry.CosmoLibBlockEntityTypes;
 import net.minecraft.core.BlockPos;
@@ -28,8 +29,14 @@ public class AnimatedFurnitureBlock extends AbstractFurnitureBlock {
 
     public static final MapCodec<AnimatedFurnitureBlock> CODEC = simpleCodec(AnimatedFurnitureBlock::new);
 
+    /** Defaults: {@link net.meh.cosmolib.furniture.FurnitureShape#FULL}, no fragile, no waterloggable. */
     public AnimatedFurnitureBlock(BlockBehaviour.Properties props) {
         super(props);
+    }
+
+    /** {@link net.meh.cosmolib.furniture.FurnitureShape#FULL} with explicit options. */
+    public AnimatedFurnitureBlock(BlockBehaviour.Properties props, FurnitureOptions opts) {
+        super(props, opts);
     }
 
     @Override

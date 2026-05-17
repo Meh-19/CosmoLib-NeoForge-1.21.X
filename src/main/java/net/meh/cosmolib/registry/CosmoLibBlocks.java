@@ -1,7 +1,11 @@
 package net.meh.cosmolib.registry;
 
 import net.meh.cosmolib.block.PaintingTableBlock;
+import net.meh.cosmolib.furniture.FurnitureOptions;
+import net.meh.cosmolib.furniture.FurnitureShape;
+import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
 import net.meh.cosmolib.furniture.block.DecorationBlock;
+import net.meh.cosmolib.paint.PaintColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -27,7 +31,25 @@ public final class CosmoLibBlocks {
                     BlockBehaviour.Properties.of()
                             .strength(1.5f)
                             .sound(SoundType.WOOD)
-                            .noOcclusion()
+                            .noCollission()
+                            .noOcclusion(),
+                    FurnitureShape.FLAT,
+                    FurnitureOptions.defaults().defaultColor(PaintColor.LIGHT_BLUE, 7)
+            ));
+
+    // -----------------------------------------------------------------------
+    // Example animated furniture (remove when a real mod supplies its own)
+    // -----------------------------------------------------------------------
+
+    public static final DeferredBlock<AnimatedFurnitureBlock> AGED_FLAG =
+            BLOCKS.register("aged_flag", () -> new AnimatedFurnitureBlock(
+                    BlockBehaviour.Properties.of()
+                            .strength(1.0f)
+                            .sound(SoundType.WOOD)
+                            .noOcclusion(),
+                    FurnitureOptions.defaults()
+                            .paintable()
+                            .defaultColor(PaintColor.LIGHT_BLUE, 7)
             ));
 
     private CosmoLibBlocks() {}

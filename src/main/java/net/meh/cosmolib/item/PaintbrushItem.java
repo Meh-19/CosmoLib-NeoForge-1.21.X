@@ -1,5 +1,6 @@
 package net.meh.cosmolib.item;
 
+import net.meh.cosmolib.furniture.block.AbstractFurnitureBlock;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
 import net.meh.cosmolib.paint.PaintData;
 import net.meh.cosmolib.tag.CosmoLibTags;
@@ -37,7 +38,9 @@ public class PaintbrushItem extends Item {
         if (color == -1) return InteractionResult.PASS;
 
         BlockState state = level.getBlockState(pos);
-        if (!state.is(CosmoLibTags.Blocks.PAINTABLE)) return InteractionResult.PASS;
+        boolean canPaint = (state.getBlock() instanceof AbstractFurnitureBlock afb && afb.isPaintable())
+                || state.is(CosmoLibTags.Blocks.PAINTABLE);
+        if (!canPaint) return InteractionResult.PASS;
 
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof FurnitureBlockEntity furniture)) return InteractionResult.PASS;

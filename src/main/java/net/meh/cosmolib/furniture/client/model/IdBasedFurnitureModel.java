@@ -9,9 +9,14 @@ import software.bernie.geckolib.model.GeoModel;
  * GeckoLib model that resolves all file paths from the block's registry ID.
  *
  * Given a block registered as {@code mymod:my_clock} the loader expects:
- *   geo:        assets/mymod/geo/block/my_clock.geo.json
- *   texture:    assets/mymod/textures/furniture/my_clock.png
- *   animation:  assets/mymod/animations/block/my_clock.animation.json
+ *   geo:       assets/mymod/geo/block/my_clock.geo.json
+ *   texture:   assets/mymod/textures/furniture/my_clock.png
+ *   animation: assets/mymod/animations/block/my_clock.animation.json
+ *
+ * The {@code textures/furniture/} directory is automatically stitched into the
+ * block atlas by CosmoLib's {@code assets/cosmolib/atlases/blocks.json} source,
+ * so the same texture file serves both GeckoLib rendering and the vanilla
+ * block model (inventory display, break particles).
  */
 public class IdBasedFurnitureModel<T extends AnimatedFurnitureBlockEntity> extends GeoModel<T> {
 

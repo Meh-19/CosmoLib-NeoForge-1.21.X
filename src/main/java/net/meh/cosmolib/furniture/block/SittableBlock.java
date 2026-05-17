@@ -1,8 +1,11 @@
 package net.meh.cosmolib.furniture.block;
 
 import com.mojang.serialization.MapCodec;
+import net.meh.cosmolib.furniture.FurnitureOptions;
+import net.meh.cosmolib.furniture.FurnitureShape;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
 import net.meh.cosmolib.registry.CosmoLibBlockEntityTypes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -26,10 +29,27 @@ public class SittableBlock extends AbstractFurnitureBlock {
     public static final MapCodec<SittableBlock> CODEC = simpleCodec(SittableBlock::new);
 
     /** Height offset (in blocks) at which the player sits above the block origin. */
-    protected float sitHeight = 0.3f;
+    protected final float sitHeight;
 
+    /** Defaults: {@link FurnitureShape#FULL}, no fragile, no waterloggable, seat at level 5. */
     public SittableBlock(BlockBehaviour.Properties props) {
-        super(props);
+        this(props, FurnitureOptions.defaults());
+    }
+
+    /** Explicit shape; seat at level 5. */
+    public SittableBlock(BlockBehaviour.Properties props, FurnitureShape shape) {
+        this(props, shape, FurnitureOptions.defaults());
+    }
+
+    /** {@link FurnitureShape#FULL} with explicit options. */
+    public SittableBlock(BlockBehaviour.Properties props, FurnitureOptions opts) {
+        this(props, FurnitureShape.FULL, opts);
+    }
+
+    /** Full constructor — shape + options. */
+    public SittableBlock(BlockBehaviour.Properties props, FurnitureShape shape, FurnitureOptions opts) {
+        super(props, shape, opts);
+        this.sitHeight = opts.getSeatHeight();
     }
 
     @Override

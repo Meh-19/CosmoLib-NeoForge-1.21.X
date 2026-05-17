@@ -2,9 +2,12 @@ package net.meh.cosmolib.event;
 
 import net.meh.cosmolib.CosmoLib;
 import net.meh.cosmolib.cosmetic.client.CosmeticPlayerLayer;
+import net.meh.cosmolib.cosmetic.client.MobCosmeticHatLayer;
+import net.meh.cosmolib.cosmetic.client.MobHatClientCache;
 import net.meh.cosmolib.cosmetic.screen.CosmeticScreen;
 import net.meh.cosmolib.cosmetic.network.OpenCosmeticScreenPayload;
 import net.meh.cosmolib.cosmetic.screen.CosmeticMenu;
+import net.meh.cosmolib.furniture.block.AbstractFurnitureBlock;
 import net.meh.cosmolib.furniture.client.AnimatedFurnitureBlockEntityRenderer;
 import net.meh.cosmolib.furniture.client.FurnitureBlockEntityRenderer;
 import net.meh.cosmolib.paint.client.PaintColorProvider;
@@ -13,8 +16,14 @@ import net.meh.cosmolib.registry.CosmoLibItems;
 import net.meh.cosmolib.registry.CosmoLibMenuTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -42,15 +51,53 @@ public final class ClientEventHandler {
     }
 
     // ------------------------------------------------------------------
-    // Player cosmetic layer
+    // Entity render layers — players + mobs
     // ------------------------------------------------------------------
     @SubscribeEvent
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
         Minecraft mc = Minecraft.getInstance();
+
+        // --- Player cosmetic layer ---
         for (PlayerSkin.Model skin : event.getSkins()) {
             var renderer = event.getSkin(skin);
             if (renderer instanceof PlayerRenderer pr) {
                 pr.addLayer(new CosmeticPlayerLayer(pr, mc.getItemRenderer()));
+            }
+        }
+
+        // --- Mob cosmetic hat layer ---
+        // Registered for every entity type that supports a head cosmetic.
+        // MobCosmeticHatLayer uses root().getChild("head") to locate the head
+        // part, so it gracefully skips any mob whose model doesn't have one.
+        EntityType<?>[] hatMobs = {
+                EntityType.ALLAY,
+                EntityType.BLAZE,
+                EntityType.BOGGED,
+                EntityType.BREEZE,
+                EntityType.COW,
+                EntityType.CREEPER,
+                EntityType.DROWNED,
+                EntityType.ENDERMAN,
+                EntityType.FOX,
+                EntityType.HUSK,
+                EntityType.IRON_GOLEM,
+                EntityType.PIG,
+                EntityType.PIGLIN,
+                EntityType.PIGLIN_BRUTE,
+                EntityType.POLAR_BEAR,
+                EntityType.SHEEP,
+                EntityType.SKELETON,
+                EntityType.STRAY,
+                EntityType.WITHER_SKELETON,
+                EntityType.ZOMBIE,
+                EntityType.ZOMBIFIED_PIGLIN,
+        };
+
+        for (EntityType<?> type : hatMobs) {
+            EntityRenderer<?> renderer = event.getRenderer(type);
+            if (renderer instanceof LivingEntityRenderer ler) {
+                ler.addLayer(new MobCosmeticHatLayer(ler, mc.getItemRenderer()));
             }
         }
     }
@@ -88,6 +135,18 @@ public final class ClientEventHandler {
                 CosmoLibItems.PAINTBRUSH.get(),
                 CosmoLibItems.COSMO_HAT.get(),
                 CosmoLibItems.COSMO_ROBE.get(),
-                CosmoLibItems.COSMO_CANE.get());
+                CosmoLibItems.COSMO_CANE.get(),
+                CosmoLibItems.FINISH_PREVIEW.get());
+
+        // Register paint tinting for every furniture block item — covers both
+        // CosmoLib's own furniture and any furniture added by dependent mods.
+        for (var block : BuiltInRegistries.BLOCK) {
+            if (block instanceof AbstractFurnitureBlock) {
+                Item item = block.asItem();
+                if (item != Items.AIR) {
+                    event.register(PaintColorProvider.INSTANCE, item);
+                }
+            }
+        }
     }
 }
