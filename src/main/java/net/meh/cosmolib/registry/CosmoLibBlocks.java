@@ -5,6 +5,7 @@ import net.meh.cosmolib.furniture.FurnitureOptions;
 import net.meh.cosmolib.furniture.FurnitureShape;
 import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
 import net.meh.cosmolib.furniture.block.DecorationBlock;
+import net.meh.cosmolib.furniture.block.FurnitureChildBlock;
 import net.meh.cosmolib.paint.PaintColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -50,6 +51,23 @@ public final class CosmoLibBlocks {
                     FurnitureOptions.defaults()
                             .paintable()
                             .defaultColor(PaintColor.LIGHT_BLUE, 7)
+            ));
+
+    // -----------------------------------------------------------------------
+    // Multi-block child placeholder (never obtainable by players)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Invisible placeholder block placed at every non-anchor position of a
+     * multi-block furniture piece.  Not obtainable — no BlockItem is registered.
+     */
+    public static final DeferredBlock<FurnitureChildBlock> FURNITURE_CHILD =
+            BLOCKS.register("furniture_child", () -> new FurnitureChildBlock(
+                    BlockBehaviour.Properties.of()
+                            .strength(0.0f)
+                            .noOcclusion()
+                            .isSuffocating((s, l, p) -> false)
+                            .isViewBlocking((s, l, p) -> false)
             ));
 
     private CosmoLibBlocks() {}

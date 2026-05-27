@@ -51,16 +51,19 @@ public class AnimatedFurnitureBlock extends AbstractFurnitureBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        if (beTypeSupplier != null) return beTypeSupplier.get().create(pos, state);
         return CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get().create(pos, state);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
         if (level.isClientSide) {
-            return createTickerHelper(type,
-                    CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get(),
-                    AnimatedFurnitureBlockEntity::clientTick);
+            BlockEntityType<AnimatedFurnitureBlockEntity> animType = beTypeSupplier != null
+                    ? (BlockEntityType<AnimatedFurnitureBlockEntity>) beTypeSupplier.get()
+                    : CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get();
+            return createTickerHelper(type, animType, AnimatedFurnitureBlockEntity::clientTick);
         }
         return null;
     }

@@ -4,6 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.meh.cosmolib.cosmetic.CosmeticSlot;
+import net.meh.cosmolib.cosmetic.offset.BackOffsetManager;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -82,8 +84,9 @@ public class CosmeticPlayerLayer
         ps.pushPose();
         getParentModel().body.translateAndRotate(ps);
 
-        // Y-axis updated from -3.49375 to -0.57625 to move it down 46.68 Blockbench units
-        ps.translate(0.0, -0.57625, 0.25 - 0.1875 - 0.0625);
+        double yOff = BackOffsetManager.getY(
+                BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        ps.translate(0.0, yOff, 0.25 - 0.1875 - 0.0625);
 
         ps.mulPose(Axis.XP.rotationDegrees(180));
         ps.mulPose(Axis.YP.rotationDegrees(180));

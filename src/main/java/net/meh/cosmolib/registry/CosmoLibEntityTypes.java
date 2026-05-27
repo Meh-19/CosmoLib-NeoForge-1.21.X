@@ -1,5 +1,6 @@
 package net.meh.cosmolib.registry;
 
+import net.meh.cosmolib.entity.CosmeticMannequinEntity;
 import net.meh.cosmolib.entity.SeatEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -21,6 +22,14 @@ public final class CosmoLibEntityTypes {
                             .noSave()
                             .noSummon()
                             .build("seat"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<CosmeticMannequinEntity>> COSMETIC_MANNEQUIN =
+            ENTITY_TYPES.register("cosmetic_mannequin",
+                    () -> EntityType.Builder.<CosmeticMannequinEntity>of(CosmeticMannequinEntity::new, MobCategory.MISC)
+                            .sized(0.6f, 1.95f)
+                            .clientTrackingRange(10)
+                            .updateInterval(2)
+                            .build("cosmetic_mannequin"));
 
     private CosmoLibEntityTypes() {}
 }

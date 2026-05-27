@@ -2,6 +2,8 @@ package net.meh.cosmolib.event;
 
 import net.meh.cosmolib.CosmoLib;
 import net.meh.cosmolib.cosmetic.CosmeticManager;
+import net.meh.cosmolib.furniture.layout.MultiBlockLayoutManager;
+import net.meh.cosmolib.furniture.tool.BoundingBoxSelectorSession;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -17,6 +19,18 @@ public final class GameEventHandler {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             CosmeticManager.onPlayerJoin(sp);
+        }
+    }
+
+    /**
+     * Clears any active {@link BoundingBoxSelectorSession} when a player logs out,
+     * so their in-progress work does not linger and block other server operations.
+     * The temp crash-recovery file is intentionally left on disk for inspection.
+     */
+    @SubscribeEvent
+    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            BoundingBoxSelectorSession.clear(sp.getStringUUID());
         }
     }
 }

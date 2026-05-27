@@ -2,6 +2,7 @@ package net.meh.cosmolib.furniture.blockentity;
 
 import net.meh.cosmolib.registry.CosmoLibBlockEntityTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -30,7 +31,11 @@ public class AnimatedFurnitureBlockEntity extends FurnitureBlockEntity implement
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public AnimatedFurnitureBlockEntity(BlockPos pos, BlockState state) {
-        super(CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get(), pos, state);
+        this(CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get(), pos, state);
+    }
+
+    public AnimatedFurnitureBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     /** Map a block's registry ID to its looping animation name. */

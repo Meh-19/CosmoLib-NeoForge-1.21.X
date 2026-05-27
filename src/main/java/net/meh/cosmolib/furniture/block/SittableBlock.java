@@ -5,6 +5,7 @@ import net.meh.cosmolib.furniture.FurnitureOptions;
 import net.meh.cosmolib.furniture.FurnitureShape;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
 import net.meh.cosmolib.registry.CosmoLibBlockEntityTypes;
+import net.meh.cosmolib.registry.CosmoLibItems;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -57,9 +58,18 @@ public class SittableBlock extends AbstractFurnitureBlock {
         return CODEC;
     }
 
+    /** Returns the sit height (in blocks) configured for this sittable block. */
+    public float getSitHeight() { return sitHeight; }
+
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                 Player player, BlockHitResult hit) {
+        // Let the bounding-box selector handle the click — don't sit
+        if (player.getMainHandItem().is(CosmoLibItems.BOUNDING_BOX_SELECTOR.get())
+                || player.getOffhandItem().is(CosmoLibItems.BOUNDING_BOX_SELECTOR.get())) {
+            return InteractionResult.PASS;
+        }
+
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         // Find any existing rider
@@ -92,6 +102,7 @@ public class SittableBlock extends AbstractFurnitureBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        if (beTypeSupplier != null) return beTypeSupplier.get().create(pos, state);
         return CosmoLibBlockEntityTypes.FURNITURE_ENTITY.get().create(pos, state);
     }
 

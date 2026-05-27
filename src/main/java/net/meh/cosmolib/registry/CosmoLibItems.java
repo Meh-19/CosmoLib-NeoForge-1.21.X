@@ -4,7 +4,10 @@ import net.meh.cosmolib.cosmetic.CosmeticDefault;
 import net.meh.cosmolib.cosmetic.CosmeticItem;
 import net.meh.cosmolib.cosmetic.CosmeticRarity;
 import net.meh.cosmolib.cosmetic.CosmeticSlot;
+import net.meh.cosmolib.cosmetic.tool.BackswagTunerItem;
 import net.meh.cosmolib.furniture.item.FurnitureBlockItem;
+import net.meh.cosmolib.furniture.tool.BoundingBoxSelectorItem;
+import net.meh.cosmolib.item.CosmeticMannequinItem;
 import net.meh.cosmolib.item.PaintbrushItem;
 import net.meh.cosmolib.paint.PaintColor;
 import net.minecraft.world.item.BlockItem;
@@ -75,11 +78,45 @@ public final class CosmoLibItems {
                     CosmoLibBlocks.AGED_FLAG.get(), new Item.Properties()));
 
     // ------------------------------------------------------------------
+    // Cosmetic Mannequin placement item
+    // ------------------------------------------------------------------
+    public static final DeferredItem<CosmeticMannequinItem> COSMETIC_MANNEQUIN =
+            ITEMS.register("cosmetic_mannequin", () -> new CosmeticMannequinItem(
+                    new Item.Properties().stacksTo(16)
+            ));
+
+    // ------------------------------------------------------------------
     // Internal GUI-only item used to render finish previews in the
     // painting table screen.  Not obtainable; never appears in-world.
     // ------------------------------------------------------------------
     public static final DeferredItem<Item> FINISH_PREVIEW =
             ITEMS.register("finish_preview", () -> new Item(
+                    new Item.Properties().stacksTo(1)
+            ));
+
+    // ------------------------------------------------------------------
+    // Developer tool — Bounding Box Selector
+    // Creative-mode + operator only; used to define multi-block hitbox layouts.
+    // ------------------------------------------------------------------
+
+    /**
+     * In-game developer tool for defining and saving multi-block furniture layouts.
+     * See {@link BoundingBoxSelectorItem} for the full usage workflow.
+     */
+    public static final DeferredItem<BoundingBoxSelectorItem> BOUNDING_BOX_SELECTOR =
+            ITEMS.register("bounding_box_selector", () -> new BoundingBoxSelectorItem(
+                    new Item.Properties().stacksTo(1)
+            ));
+
+    /**
+     * Developer tool for tuning the Y render offset of back cosmetics in-game.
+     * Equip a back cosmetic, hold this item, and scroll to adjust the Y translation.
+     * Ctrl+Click saves to {@code config/cosmolib/back_offsets.json};
+     * Shift+Click cancels without saving.
+     * See {@link BackswagTunerItem} for the full usage workflow.
+     */
+    public static final DeferredItem<BackswagTunerItem> BACKSWAG_TUNER =
+            ITEMS.register("backswag_tuner", () -> new BackswagTunerItem(
                     new Item.Properties().stacksTo(1)
             ));
 

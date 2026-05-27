@@ -1,18 +1,24 @@
 package net.meh.cosmolib.event;
 
 import net.meh.cosmolib.CosmoLib;
+import net.meh.cosmolib.cosmetic.CosmeticItem;
+import net.meh.cosmolib.cosmetic.CosmeticSlot;
 import net.meh.cosmolib.cosmetic.client.CosmeticPlayerLayer;
 import net.meh.cosmolib.cosmetic.client.MobCosmeticHatLayer;
 import net.meh.cosmolib.cosmetic.client.MobHatClientCache;
 import net.meh.cosmolib.cosmetic.screen.CosmeticScreen;
 import net.meh.cosmolib.cosmetic.network.OpenCosmeticScreenPayload;
 import net.meh.cosmolib.cosmetic.screen.CosmeticMenu;
+import net.meh.cosmolib.entity.client.CosmeticMannequinRenderer;
 import net.meh.cosmolib.furniture.block.AbstractFurnitureBlock;
+import net.meh.cosmolib.entity.SeatEntity;
 import net.meh.cosmolib.furniture.client.AnimatedFurnitureBlockEntityRenderer;
 import net.meh.cosmolib.furniture.client.FurnitureBlockEntityRenderer;
 import net.meh.cosmolib.paint.client.PaintColorProvider;
 import net.meh.cosmolib.registry.CosmoLibBlockEntityTypes;
+import net.meh.cosmolib.registry.CosmoLibEntityTypes;
 import net.meh.cosmolib.registry.CosmoLibItems;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.meh.cosmolib.registry.CosmoLibMenuTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -37,6 +43,14 @@ public final class ClientEventHandler {
     // Key bindings
     // ------------------------------------------------------------------
     public static net.minecraft.client.KeyMapping OPEN_COSMETICS;
+    /** Ctrl+Z equivalent for undoing the last selection change in the BB Selector. */
+    public static net.minecraft.client.KeyMapping BB_UNDO;
+    /**
+     * Toggles slab-hitbox mode in the BB Selector.
+     * While active, added positions use a half-height (8/16) collision shape.
+     * Default: Left Alt.
+     */
+    public static net.minecraft.client.KeyMapping BB_SLAB;
 
     private ClientEventHandler() {}
 
@@ -47,7 +61,19 @@ public final class ClientEventHandler {
                 org.lwjgl.glfw.GLFW.GLFW_KEY_PERIOD,
                 "key.categories.cosmolib"
         );
+        BB_UNDO = new net.minecraft.client.KeyMapping(
+                "key.cosmolib.bb_undo",
+                org.lwjgl.glfw.GLFW.GLFW_KEY_Z,
+                "key.categories.cosmolib"
+        );
+        BB_SLAB = new net.minecraft.client.KeyMapping(
+                "key.cosmolib.bb_slab",
+                org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT,
+                "key.categories.cosmolib"
+        );
         event.register(OPEN_COSMETICS);
+        event.register(BB_UNDO);
+        event.register(BB_SLAB);
     }
 
     // ------------------------------------------------------------------
@@ -107,12 +133,12 @@ public final class ClientEventHandler {
     // ------------------------------------------------------------------
     @SubscribeEvent
     public static void registerBERs(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(CosmoLibEntityTypes.SEAT.get(), NoopRenderer::new);
+        event.registerEntityRenderer(CosmoLibEntityTypes.COSMETIC_MANNEQUIN.get(),
+                CosmeticMannequinRenderer::new);
         event.registerBlockEntityRenderer(
                 CosmoLibBlockEntityTypes.FURNITURE_ENTITY.get(),
                 FurnitureBlockEntityRenderer::new);
-        event.registerBlockEntityRenderer(
-                CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get(),
-                AnimatedFurnitureBlockEntityRenderer::new);
     }
 
     // ------------------------------------------------------------------
@@ -131,12 +157,21 @@ public final class ClientEventHandler {
     // ------------------------------------------------------------------
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        // Tools and utility items — not CosmeticItems, registered manually.
         event.register(PaintColorProvider.INSTANCE,
                 CosmoLibItems.PAINTBRUSH.get(),
-                CosmoLibItems.COSMO_HAT.get(),
-                CosmoLibItems.COSMO_ROBE.get(),
-                CosmoLibItems.COSMO_CANE.get(),
                 CosmoLibItems.FINISH_PREVIEW.get());
+
+        // Auto-discover every paintable CosmeticItem registered by any mod.
+        // CosmeticItem self-registers into SLOT_POOL on construction, so this
+        // picks up cosmetics from CosmeticRegistrar and manual registrations alike.
+        for (CosmeticSlot slot : CosmeticSlot.values()) {
+            for (CosmeticItem cosmeticItem : CosmeticItem.getBySlot(slot)) {
+                if (cosmeticItem.isPaintable()) {
+                    event.register(PaintColorProvider.INSTANCE, cosmeticItem);
+                }
+            }
+        }
 
         // Register paint tinting for every furniture block item — covers both
         // CosmoLib's own furniture and any furniture added by dependent mods.

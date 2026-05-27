@@ -3,12 +3,18 @@ package net.meh.cosmolib.event;
 import net.meh.cosmolib.CosmoLib;
 import net.meh.cosmolib.cosmetic.client.MobHatClientCache;
 import net.meh.cosmolib.cosmetic.network.OpenCosmeticScreenPayload;
+import net.meh.cosmolib.furniture.tool.client.BoundingBoxClientState;
+import net.meh.cosmolib.furniture.tool.client.BoundingBoxRenderer;
+import net.meh.cosmolib.furniture.tool.network.ToggleBBSlabPayload;
+import net.meh.cosmolib.furniture.tool.network.UndoSelectionPayload;
+import net.meh.cosmolib.registry.CosmoLibItems;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -22,9 +28,8 @@ public final class ClientGameEventHandler {
     private ClientGameEventHandler() {}
 
     /**
-     * Polls the cosmetic-screen keybind each tick and asks the server to open
-     * the menu when it is consumed.  Must run on the GAME bus so it fires
-     * during active gameplay, not just during mod setup.
+     * Polls the cosmetic-screen keybind and the BB-undo keybind each tick.
+     * Must run on the GAME bus so it fires during active gameplay.
      */
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Pre event) {
@@ -35,11 +40,30 @@ public final class ClientGameEventHandler {
         while (ClientEventHandler.OPEN_COSMETICS.consumeClick()) {
             PacketDistributor.sendToServer(new OpenCosmeticScreenPayload());
         }
+
+        // BB Selector keybinds — only fire when session is active and player holds the tool
+        if (BoundingBoxClientState.sessionActive
+                && (mc.player.getMainHandItem().is(CosmoLibItems.BOUNDING_BOX_SELECTOR.get())
+                        || mc.player.getOffhandItem().is(CosmoLibItems.BOUNDING_BOX_SELECTOR.get()))) {
+            while (ClientEventHandler.BB_UNDO.consumeClick()) {
+                PacketDistributor.sendToServer(new UndoSelectionPayload());
+            }
+            while (ClientEventHandler.BB_SLAB.consumeClick()) {
+                PacketDistributor.sendToServer(new ToggleBBSlabPayload());
+            }
+        }
     }
 
-    /** Clear the mob hat cache whenever this client disconnects from a world. */
+    /** Clear the mob hat cache and BB client state whenever this client disconnects. */
     @SubscribeEvent
     public static void onClientLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         MobHatClientCache.clear();
+        BoundingBoxClientState.clear();
+    }
+
+    /** Delegate world-level wireframe rendering to {@link BoundingBoxRenderer}. */
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent event) {
+        BoundingBoxRenderer.render(event);
     }
 }

@@ -4,12 +4,16 @@ import net.meh.cosmolib.cosmetic.CosmeticDefault;
 import net.meh.cosmolib.furniture.FurnitureOptions;
 import net.meh.cosmolib.furniture.FurnitureShape;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
+import net.meh.cosmolib.furniture.blockentity.FurnitureChildBlockEntity;
+import net.meh.cosmolib.furniture.layout.MultiBlockLayoutManager;
 import net.meh.cosmolib.paint.PaintData;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -38,9 +42,11 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.meh.cosmolib.registry.CosmoLibBlocks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Base class for all CosmoLib furniture blocks.
@@ -60,7 +66,8 @@ import java.util.List;
  *
  * Subclasses must implement {@link #newBlockEntity} and {@link #codec}.
  */
-public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+public abstract class AbstractFurnitureBlock extends BaseEntityBlock
+        implements SimpleWaterloggedBlock, FurnitureDisplayModeProvider {
 
     // ------------------------------------------------------------------
     // Block state properties
@@ -81,10 +88,13 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
     // ------------------------------------------------------------------
 
     /**
-     * Added to the raw yaw-to-rotation mapping so that rotation=0 corresponds
-     * to a player facing north, matching Minecraft's sign/skull convention.
+     * No offset — rotation=0 is produced when the player faces South (yaw=0),
+     * which makes the block face North (toward where the player was standing).
+     * This is the conventional "block faces the placer" behaviour used by most
+     * furniture mods, and keeps the values consistent with the ROTATION_DIRS
+     * table in BoundingBoxRenderer (0 = North, 2 = East, 4 = South, 6 = West).
      */
-    private static final int FACE_OFFSET  = 4;
+    private static final int FACE_OFFSET  = 0;
     private static final int MODEL_OFFSET = 0;
 
     private static final ResourceLocation COSMOLIB_FONT =
@@ -122,6 +132,22 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
     @Nullable
     private final CosmeticDefault defaultAppearance;
 
+    /**
+     * Optional override for the block entity type created by {@link #newBlockEntity}.
+     * Dependent mods should set this so their blocks are registered under their own
+     * {@link BlockEntityType}, ensuring NeoForge's validity check passes on world load.
+     */
+    @Nullable
+    protected final Supplier<BlockEntityType<? extends FurnitureBlockEntity>> beTypeSupplier;
+
+    /**
+     * When non-null, broken or pick-blocked, this block drops/returns the specified
+     * block's item instead of its own. Used for wall/ceiling variants that should
+     * give back the canonical floor item when destroyed.
+     */
+    @Nullable
+    private final Supplier<net.minecraft.world.level.block.Block> dropAsBlock;
+
     // ------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------
@@ -149,13 +175,50 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
         this.waterloggable     = opts.isWaterloggable();
         this.paintable         = opts.isPaintable();
         this.defaultAppearance = opts.getDefaultAppearance();
+        this.beTypeSupplier    = opts.getBlockEntityType();
+        this.dropAsBlock       = opts.getDropAsBlock();
         registerDefaultState(stateDefinition.any()
                 .setValue(ROTATION, 0)
                 .setValue(WATERLOGGED, false));
     }
 
+    // ------------------------------------------------------------------
+    // Registry name helper
+    // ------------------------------------------------------------------
+
+    /**
+     * Returns the registry path of this block (e.g. {@code "ancient_arbor"}).
+     * Used by the multi-block system to look up the layout in
+     * {@link MultiBlockLayoutManager}.
+     *
+     * <p>Only valid after all registries are frozen (i.e. during normal gameplay).
+     */
+    public String getRegistryName() {
+        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(this);
+        return key != null ? key.getPath() : "";
+    }
+
+    // ------------------------------------------------------------------
+    // Multi-block layout helpers
+    // ------------------------------------------------------------------
+
+    /**
+     * Returns {@code true} if a {@link net.meh.cosmolib.furniture.layout.MultiBlockLayout}
+     * has been loaded for this block.  When {@code true}, placement and removal
+     * will automatically manage child blocks.
+     */
+    public boolean hasMultiBlockLayout() {
+        return MultiBlockLayoutManager.get(getRegistryName()).isPresent();
+    }
+
     /** {@code true} if this block can be painted with a paintbrush / in the painting table. */
     public boolean isPaintable() { return paintable; }
+
+    /** Default display mode — subclasses override to return FLOOR, WALL, or BLOCK_UP. */
+    @Override
+    public FurnitureDisplayMode getDisplayMode(BlockState state) {
+        return FurnitureDisplayMode.TOP_FACE;
+    }
 
     /** Returns the default paint appearance baked into every item stack, or {@code null} if none. */
     @Nullable
@@ -198,13 +261,32 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
     // Shape / collision
     // ------------------------------------------------------------------
 
+    /** Half-block (slab) collision shape: 0–8/16 in Y. */
+    private static final VoxelShape SLAB_SHAPE = Block.box(0, 0, 0, 16, 8, 16);
+
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+        // Always return the configured outline so the root block can be targeted/broken.
         return furnitureShape.getShape();
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+        var layoutOpt = MultiBlockLayoutManager.get(getRegistryName());
+        if (layoutOpt.isPresent()) {
+            int rotation = state.getValue(ROTATION);
+            var layout   = layoutOpt.get();
+
+            // If the anchor position (ZERO) is not in the layout, it's passable (no collision).
+            if (!layout.getRotatedPositions(rotation).contains(BlockPos.ZERO)) {
+                return Shapes.empty();
+            }
+
+            // If the anchor is flagged as a slab position, return half-height collision.
+            if (layout.getSlabPositions(rotation).contains(BlockPos.ZERO)) {
+                return SLAB_SHAPE;
+            }
+        }
         return furnitureShape.getShape();
     }
 
@@ -214,18 +296,63 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
     }
 
     // ------------------------------------------------------------------
+    // Client extensions (particle suppression)
+    // ------------------------------------------------------------------
+
+    /**
+     * Suppresses the default block-break / block-hit particles.
+     * Without this override, {@link RenderShape#INVISIBLE} blocks fall back to the
+     * missing-texture (pink/black) sprite for particles since they have no block model.
+     */
+    @Override
+    public void initializeClient(java.util.function.Consumer<net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions> consumer) {
+        consumer.accept(new net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions() {
+            @Override
+            public boolean addDestroyEffects(BlockState state,
+                                              net.minecraft.world.level.Level level,
+                                              BlockPos pos,
+                                              net.minecraft.client.particle.ParticleEngine manager) {
+                return true; // suppress missing-texture particles on break
+            }
+            @Override
+            public boolean addHitEffects(BlockState state,
+                                          net.minecraft.world.level.Level level,
+                                          net.minecraft.world.phys.HitResult target,
+                                          net.minecraft.client.particle.ParticleEngine manager) {
+                return true; // suppress missing-texture particles on hit
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------
     // Placement
     // ------------------------------------------------------------------
 
     @Override
+    @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         float yaw   = ctx.getRotation();
         int   rot   = Math.floorMod(Math.round(yaw / 45.0f) + FACE_OFFSET + MODEL_OFFSET, 8);
         boolean inWater = waterloggable
                 && ctx.getLevel().getFluidState(ctx.getClickedPos()).is(FluidTags.WATER);
-        return defaultBlockState()
+        BlockState state = defaultBlockState()
                 .setValue(ROTATION, rot)
                 .setValue(WATERLOGGED, inWater);
+
+        // Multi-block placement check — verify all child positions are clear
+        var layoutOpt = MultiBlockLayoutManager.get(getRegistryName());
+        if (layoutOpt.isPresent()) {
+            Level level   = ctx.getLevel();
+            BlockPos anchor = ctx.getClickedPos();
+            for (BlockPos rel : layoutOpt.get().getRotatedPositions(rot)) {
+                if (rel.equals(BlockPos.ZERO)) continue; // anchor already checked by vanilla
+                BlockPos worldPos = anchor.offset(rel);
+                if (!level.getBlockState(worldPos).canBeReplaced(ctx)) {
+                    return null; // blocked — abort placement
+                }
+            }
+        }
+        return state;
     }
 
     @Override
@@ -236,6 +363,51 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
         if (color >= 0 && level.getBlockEntity(pos) instanceof FurnitureBlockEntity be) {
             be.setPaintColor(color);
         }
+
+        // Multi-block placement — fill child positions
+        if (!level.isClientSide) {
+            MultiBlockLayoutManager.get(getRegistryName()).ifPresent(layout -> {
+                int rotation   = state.getValue(ROTATION);
+                String fid     = getRegistryName();
+                BlockState childState = CosmoLibBlocks.FURNITURE_CHILD.get().defaultBlockState();
+                List<BlockPos> slabPosRel = layout.getSlabPositions(rotation);
+                List<BlockPos> seatPosRel = layout.getSeatingPositions(rotation);
+                float seatH = layout.getSeatHeight();
+                for (BlockPos rel : layout.getRotatedPositions(rotation)) {
+                    if (rel.equals(BlockPos.ZERO)) continue; // anchor is already the root block
+                    BlockPos worldPos = pos.offset(rel);
+                    level.setBlock(worldPos, childState, Block.UPDATE_ALL);
+                    if (level.getBlockEntity(worldPos) instanceof FurnitureChildBlockEntity child) {
+                        child.init(pos, fid, slabPosRel.contains(rel), seatPosRel.contains(rel), seatH);
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * When the root furniture block is removed (and not replaced by the same block),
+     * tear down all associated child blocks.  Protected against re-entry via
+     * {@link FurnitureChildBlock#isCleaningUp()}.
+     */
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos,
+                          BlockState newState, boolean movedByPiston) {
+        if (!level.isClientSide
+                && !newState.is(this)
+                && !FurnitureChildBlock.isCleaningUp()) {
+            MultiBlockLayoutManager.get(getRegistryName()).ifPresent(layout -> {
+                int rotation = state.getValue(ROTATION);
+                for (BlockPos rel : layout.getRotatedPositions(rotation)) {
+                    if (rel.equals(BlockPos.ZERO)) continue;
+                    BlockPos worldPos = pos.offset(rel);
+                    if (level.getBlockState(worldPos).is(CosmoLibBlocks.FURNITURE_CHILD.get())) {
+                        level.removeBlock(worldPos, false);
+                    }
+                }
+            });
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     // ------------------------------------------------------------------
@@ -275,9 +447,13 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
     // Paint-color drops
     // ------------------------------------------------------------------
 
+    private net.minecraft.world.level.block.Block resolveDropBlock() {
+        return dropAsBlock != null ? dropAsBlock.get() : this;
+    }
+
     @Override
     public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
-        ItemStack stack = new ItemStack(this);
+        ItemStack stack = new ItemStack(resolveDropBlock());
         if (level.getBlockEntity(pos) instanceof FurnitureBlockEntity be) {
             int color = be.getPaintColor();
             if (color >= 0) PaintData.applyColor(stack, color);
@@ -288,12 +464,13 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock implements 
     /**
      * Drops the block item with its paint color preserved.
      * Fragile blocks are silently destroyed with no drop.
+     * Wall/ceiling variants drop the floor item when {@code dropAsBlock} is set.
      */
     @Override
     public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state,
                                @Nullable BlockEntity be, ItemStack tool) {
         if (!fragile && !level.isClientSide && be instanceof FurnitureBlockEntity fbe) {
-            ItemStack drop = new ItemStack(this);
+            ItemStack drop = new ItemStack(resolveDropBlock());
             int color = fbe.getPaintColor();
             if (color >= 0) PaintData.applyColor(drop, color);
             popResource(level, pos, drop);

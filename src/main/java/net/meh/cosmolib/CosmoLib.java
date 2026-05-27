@@ -1,9 +1,20 @@
 package net.meh.cosmolib;
 
 import net.meh.cosmolib.cosmetic.CosmeticRegistry;
+import net.meh.cosmolib.cosmetic.offset.BackOffsetManager;
+import net.meh.cosmolib.entity.CosmeticMannequinEntity;
 import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
+import net.meh.cosmolib.furniture.layout.MultiBlockLayoutManager;
 import net.meh.cosmolib.registry.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.slf4j.Logger;
@@ -83,6 +94,41 @@ public class CosmoLib {
                     ResourceLocation.fromNamespaceAndPath(MOD_ID, "aged_flag"),
                     "flag_sway"
             );
+
+            // Load all furniture layout JSONs from config/cosmolib/furniture_layouts/
+            MultiBlockLayoutManager.load();
+
+            // Load per-cosmetic back Y offsets from config/cosmolib/back_offsets.json
+            BackOffsetManager.load();
+
+            // Dispenser behaviour: shoot a cosmetic mannequin into the world,
+            // facing away from the dispenser (same convention as armor stands).
+            DispenserBlock.registerBehavior(CosmoLibItems.COSMETIC_MANNEQUIN.get(),
+                    new DefaultDispenseItemBehavior() {
+                        @Override
+                        protected ItemStack execute(BlockSource source, ItemStack stack) {
+                            Direction facing = source.state().getValue(DispenserBlock.FACING);
+                            BlockPos pos = source.pos().relative(facing);
+                            ServerLevel level = source.level();
+
+                            double cx = pos.getX() + 0.5;
+                            double cy = pos.getY();
+                            double cz = pos.getZ() + 0.5;
+                            AABB spawnBox = CosmoLibEntityTypes.COSMETIC_MANNEQUIN.get()
+                                    .getDimensions().makeBoundingBox(cx, cy, cz);
+                            if (level.noCollision(spawnBox)) {
+                                CosmeticMannequinEntity mannequin = new CosmeticMannequinEntity(
+                                        CosmoLibEntityTypes.COSMETIC_MANNEQUIN.get(), level);
+                                mannequin.setPos(cx, cy, cz);
+                                // Face away from the dispenser
+                                float yaw = facing.getOpposite().toYRot();
+                                mannequin.setRotationIndex(Math.floorMod(Math.round(yaw / 45.0f), 8));
+                                level.addFreshEntity(mannequin);
+                                stack.shrink(1);
+                            }
+                            return stack;
+                        }
+                    });
         });
     }
 }

@@ -7,7 +7,56 @@
       "PowerShell(head -100)",
       "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\.claude\\\\worktrees\\\\infallible-liskov-ec91bd\\\\src\\\\main\\\\java\\\\com\" -ErrorAction SilentlyContinue)",
       "Bash(Remove-Item -Force \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\.claude\\\\worktrees\\\\infallible-liskov-ec91bd\\\\src\\\\main\\\\resources\\\\assets\\\\examplemod\\\\lang\\\\en_us.json\" -ErrorAction SilentlyContinue)",
-      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\.claude\\\\worktrees\\\\infallible-liskov-ec91bd\\\\src\\\\main\\\\resources\\\\assets\\\\examplemod\" -ErrorAction SilentlyContinue)"
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\.claude\\\\worktrees\\\\infallible-liskov-ec91bd\\\\src\\\\main\\\\resources\\\\assets\\\\examplemod\" -ErrorAction SilentlyContinue)",
+      "Bash(./gradlew compileJava)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(.\\\\gradlew.bat compileJava)",
+      "Bash(.\\\\\\\\gradlew.bat compileJava)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\")",
+      "Bash(dir \"C:\\\\Users\\\\pickn\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\Documents\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\Desktop\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjectsBackup\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\Google Drive\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\curseforge\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\" /s /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\assets\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\assets\\\\unearthed\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\assets\\\\unearthed\\\\textures\\\\item\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\assets\\\\unearthed\\\\geo\\\\entity\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\assets\\\\unearthed\\\\models\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\assets\\\\unearthed\\\\models\\\\item\" /b)",
+      "Bash(findstr -i \"cosmetic\\\\|helmet\\\\|robe\\\\|cane\\\\|hood\\\\|mask\\\\|crown\\\\|pelt\\\\|wing\\\\|banner\\\\|torch\\\\|hammer\\\\|gaunt\\\\|goblet\\\\|horn\\\\|skull\")",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\data\\\\unearthed\" /s /b)",
+      "Bash(dir \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\Unearthed-NeoForge-1.12.X\\\\src\\\\main\\\\resources\\\\data\\\\unearthed\\\\assembly\" /b)",
+      "Bash(dir .gradle /s /b)",
+      "Bash(findstr /i \"geckolib\")",
+      "Bash(dir build *)",
+      "Bash(findstr /i \"geckolib.*sources\")",
+      "Bash(dir .gradle -r -fi \"*.jar\")",
+      "Bash(findstr /i \"gecko\")",
+      "Bash(dir /s /b \"C:\\\\Users\\\\pickn\\\\.gradle\\\\caches\")",
+      "Bash(gradlew compileJava)",
+      "Bash(find ~/.gradle -name \"geckolib*.jar\" -not -name \"*sources*\" 2>/dev/null | head -5)",
+      "Read(//c/tmp/**)",
+      "Bash(jar tf *)",
+      "Bash(jar xf *)",
+      "Bash(javap -p -verbose software/bernie/geckolib/renderer/GeoEntityRenderer.class)",
+      "Bash(javap -p -c software/bernie/geckolib/renderer/GeoEntityRenderer.class)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NonInteractive -Command \".\\gradlew.bat jar; if ($LASTEXITCODE -eq 0) { Copy-Item build/libs/cosmolib-*.jar C:/Users/pickn/IdeaProjects/Unearthed-NeoForge-1.12.X/libs/ -Force; Write-Output 'Deployed CosmoLib jar to Unearthed libs.' }\"",
+            "timeout": 300
+          }
+        ]
+      }
     ]
   }
 }

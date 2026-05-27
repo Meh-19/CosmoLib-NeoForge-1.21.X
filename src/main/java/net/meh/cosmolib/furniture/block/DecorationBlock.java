@@ -38,24 +38,29 @@ public class DecorationBlock extends AbstractFurnitureBlock {
 
     public static final MapCodec<DecorationBlock> CODEC = simpleCodec(DecorationBlock::new);
 
-    /** Defaults: {@link FurnitureShape#FULL}, no fragile, no waterloggable. */
+    /** Defaults: {@link FurnitureShape#FLAT} (1 px thin slab), no fragile, no waterloggable. */
     public DecorationBlock(BlockBehaviour.Properties props) {
-        super(props);
+        super(props, FurnitureShape.FLAT, FurnitureOptions.defaults());
     }
 
     /** Explicit shape; no fragile, no waterloggable. */
     public DecorationBlock(BlockBehaviour.Properties props, FurnitureShape shape) {
-        super(props, shape);
+        super(props, shape, FurnitureOptions.defaults());
     }
 
-    /** {@link FurnitureShape#FULL} with explicit options. */
+    /** {@link FurnitureShape#FLAT} with explicit options. */
     public DecorationBlock(BlockBehaviour.Properties props, FurnitureOptions opts) {
-        super(props, opts);
+        super(props, FurnitureShape.FLAT, opts);
     }
 
     /** Full constructor — shape + options. */
     public DecorationBlock(BlockBehaviour.Properties props, FurnitureShape shape, FurnitureOptions opts) {
         super(props, shape, opts);
+    }
+
+    @Override
+    public FurnitureDisplayMode getDisplayMode(net.minecraft.world.level.block.state.BlockState state) {
+        return FurnitureDisplayMode.FLOOR;
     }
 
     @Override
@@ -65,6 +70,7 @@ public class DecorationBlock extends AbstractFurnitureBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        if (beTypeSupplier != null) return beTypeSupplier.get().create(pos, state);
         return CosmoLibBlockEntityTypes.FURNITURE_ENTITY.get().create(pos, state);
     }
 

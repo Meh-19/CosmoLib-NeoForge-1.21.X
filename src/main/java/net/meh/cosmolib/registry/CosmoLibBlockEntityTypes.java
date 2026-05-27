@@ -2,6 +2,7 @@ package net.meh.cosmolib.registry;
 
 import net.meh.cosmolib.furniture.blockentity.AnimatedFurnitureBlockEntity;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
+import net.meh.cosmolib.furniture.blockentity.FurnitureChildBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -29,6 +30,17 @@ public final class CosmoLibBlockEntityTypes {
             () -> BlockEntityType.Builder
                     .of(AnimatedFurnitureBlockEntity::new,
                             CosmoLibBlocks.AGED_FLAG.get())
+                    .build(null));
+
+    /**
+     * Block entity for {@link net.meh.cosmolib.furniture.block.FurnitureChildBlock}.
+     * Stores the root position and furniture id so child blocks can tear down the
+     * entire multi-block structure when removed.
+     */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FurnitureChildBlockEntity>>
+            FURNITURE_CHILD_BE = BLOCK_ENTITY_TYPES.register("furniture_child_entity",
+            () -> BlockEntityType.Builder
+                    .of(FurnitureChildBlockEntity::new, CosmoLibBlocks.FURNITURE_CHILD.get())
                     .build(null));
 
     private CosmoLibBlockEntityTypes() {}

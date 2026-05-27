@@ -48,6 +48,11 @@ public class WallFurnitureBlock extends AbstractFurnitureBlock {
     }
 
     @Override
+    public FurnitureDisplayMode getDisplayMode(net.minecraft.world.level.block.state.BlockState state) {
+        return FurnitureDisplayMode.WALL;
+    }
+
+    @Override
     protected MapCodec<? extends WallFurnitureBlock> codec() {
         return CODEC;
     }
@@ -147,6 +152,7 @@ public class WallFurnitureBlock extends AbstractFurnitureBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        if (beTypeSupplier != null) return beTypeSupplier.get().create(pos, state);
         return CosmoLibBlockEntityTypes.FURNITURE_ENTITY.get().create(pos, state);
     }
 
