@@ -2,6 +2,7 @@ package net.meh.cosmolib;
 
 import net.meh.cosmolib.cosmetic.CosmeticRegistry;
 import net.meh.cosmolib.cosmetic.offset.BackOffsetManager;
+import net.meh.cosmolib.cosmetic.offset.HandOffsetManager;
 import net.meh.cosmolib.entity.CosmeticMannequinEntity;
 import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
 import net.meh.cosmolib.furniture.layout.MultiBlockLayoutManager;
@@ -100,6 +101,9 @@ public class CosmoLib {
 
             // Load per-cosmetic back Y offsets from config/cosmolib/back_offsets.json
             BackOffsetManager.load();
+
+            // Load per-cosmetic hand X/Y/Z offsets from config/cosmolib/hand_offsets.json
+            HandOffsetManager.load();
 
             // Dispenser behaviour: shoot a cosmetic mannequin into the world,
             // facing away from the dispenser (same convention as armor stands).

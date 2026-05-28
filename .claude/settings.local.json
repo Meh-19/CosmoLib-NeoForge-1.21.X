@@ -43,7 +43,11 @@
       "Bash(jar tf *)",
       "Bash(jar xf *)",
       "Bash(javap -p -verbose software/bernie/geckolib/renderer/GeoEntityRenderer.class)",
-      "Bash(javap -p -c software/bernie/geckolib/renderer/GeoEntityRenderer.class)"
+      "Bash(javap -p -c software/bernie/geckolib/renderer/GeoEntityRenderer.class)",
+      "Bash(javap -p -c software/bernie/geckolib/renderer/GeoRenderer.class)",
+      "Bash(javap -p -c software/bernie/geckolib/util/RenderUtil.class)",
+      "Bash(python -c ' *)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\run\\\\config\\\\cosmolib\\\\hand_offsets.json\")"
     ]
   },
   "hooks": {

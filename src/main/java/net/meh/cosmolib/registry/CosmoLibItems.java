@@ -5,6 +5,7 @@ import net.meh.cosmolib.cosmetic.CosmeticItem;
 import net.meh.cosmolib.cosmetic.CosmeticRarity;
 import net.meh.cosmolib.cosmetic.CosmeticSlot;
 import net.meh.cosmolib.cosmetic.tool.BackswagTunerItem;
+import net.meh.cosmolib.cosmetic.tool.HandTunerItem;
 import net.meh.cosmolib.furniture.item.FurnitureBlockItem;
 import net.meh.cosmolib.furniture.tool.BoundingBoxSelectorItem;
 import net.meh.cosmolib.item.CosmeticMannequinItem;
@@ -105,6 +106,16 @@ public final class CosmoLibItems {
      */
     public static final DeferredItem<BoundingBoxSelectorItem> BOUNDING_BOX_SELECTOR =
             ITEMS.register("bounding_box_selector", () -> new BoundingBoxSelectorItem(
+                    new Item.Properties().stacksTo(1)
+            ));
+
+    /**
+     * Developer tool for tuning the X/Y/Z render offset of hand cosmetics on the mannequin.
+     * Equip a hand cosmetic, hold this item, and scroll to adjust.
+     * Ctrl+Click saves to {@code config/cosmolib/hand_offsets.json}.
+     */
+    public static final DeferredItem<HandTunerItem> HAND_TUNER =
+            ITEMS.register("hand_tuner", () -> new HandTunerItem(
                     new Item.Properties().stacksTo(1)
             ));
 
