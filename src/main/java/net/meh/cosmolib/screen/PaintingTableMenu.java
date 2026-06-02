@@ -50,15 +50,16 @@ public class PaintingTableMenu extends AbstractContainerMenu {
     public static final int BUTTON_FINISH_BASE   = BUTTON_FINISH_TOGGLE + 3; // 19
 
     // -----------------------------------------------------------------------
-    // Finish display order  (11 shown; 3 enum entries hidden from UI for now)
+    // Finish display order  (14 total; 7 per page, 2 pages)
     // -----------------------------------------------------------------------
     /** Finishes shown in the UI, in page order. 7 per page. */
     public static final FinishType[] FINISH_DISPLAY_ORDER = {
         // Page 0
-        FinishType.RAINBOW, FinishType.GOLD,   FinishType.MOLTEN,
-        FinishType.BUBBLE,  FinishType.FLORAL, FinishType.GALAXY, FinishType.MATRIX,
-        // Page 1  (slots 7-10 filled; 11-13 are empty)
-        FinishType.CHROME, FinishType.GLITCH, FinishType.IRIDESCENT, FinishType.VOID
+        FinishType.RAINBOW, FinishType.GOLD,    FinishType.MOLTEN,
+        FinishType.BUBBLE,  FinishType.FLORAL,  FinishType.GALAXY, FinishType.MATRIX,
+        // Page 1
+        FinishType.CHROME,  FinishType.GLITCH,  FinishType.CUBED,  FinishType.SCANNER,
+        FinishType.PEARL,   FinishType.PHANTOM, FinishType.SNOW
     };
     public static final int FINISHES_PER_PAGE = 7;
 

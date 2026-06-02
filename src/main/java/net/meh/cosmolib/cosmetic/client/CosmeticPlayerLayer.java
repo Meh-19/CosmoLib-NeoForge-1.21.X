@@ -3,6 +3,7 @@ package net.meh.cosmolib.cosmetic.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.meh.cosmolib.cosmetic.CosmeticItem;
 import net.meh.cosmolib.cosmetic.CosmeticSlot;
 import net.meh.cosmolib.cosmetic.offset.BackOffsetManager;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,6 +16,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -90,7 +92,7 @@ public class CosmeticPlayerLayer
 
         ps.mulPose(Axis.XP.rotationDegrees(180));
         ps.mulPose(Axis.YP.rotationDegrees(180));
-        ps.scale(0.75f, 0.75f, 0.75f);
+        ps.scale(0.625f, 0.625f, 0.625f);
         renderItem(stack, ItemDisplayContext.HEAD, false, ps, buf, light);
         ps.popPose();
     }
@@ -119,13 +121,23 @@ public class CosmeticPlayerLayer
     // ------------------------------------------------------------------
     // Shared
     // ------------------------------------------------------------------
+
+    /**
+     * Renders {@code stack} at the current pose-stack position.
+     *
+     * <p>For {@link CosmeticItem}s, looks up the registered 3-D cosmetic model directly
+     * so the player always sees the cosmetic geometry — the item's registered model now
+     * points to the flat token sprite used for inventory / ground display.
+     */
     private void renderItem(ItemStack stack, ItemDisplayContext ctx, boolean leftHand,
                              PoseStack ps, MultiBufferSource buf, int light) {
-        BakedModel model = itemRenderer.getModel(
-                stack,
-                Minecraft.getInstance().level,
-                null, 0
-        );
+        BakedModel model;
+        if (stack.getItem() instanceof CosmeticItem ci && ci.getCosmeticModelId() != null) {
+            model = Minecraft.getInstance().getModelManager()
+                    .getModel(new ModelResourceLocation(ci.getCosmeticModelId(), "standalone"));
+        } else {
+            model = itemRenderer.getModel(stack, Minecraft.getInstance().level, null, 0);
+        }
         itemRenderer.render(stack, ctx, leftHand, ps, buf, light,
                 net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, model);
     }

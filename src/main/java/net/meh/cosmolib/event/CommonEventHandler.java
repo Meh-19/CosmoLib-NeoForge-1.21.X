@@ -6,7 +6,10 @@ import net.meh.cosmolib.cosmetic.network.EquipCosmeticPayload;
 import net.meh.cosmolib.cosmetic.network.MobHatSyncPayload;
 import net.meh.cosmolib.cosmetic.network.OpenCosmeticScreenPayload;
 import net.meh.cosmolib.cosmetic.network.SyncCosmeticsPayload;
-
+import net.meh.cosmolib.crate.CrateLootTable;
+import net.meh.cosmolib.crate.network.CrateLuckSyncPacket;
+import net.meh.cosmolib.crate.network.CrateOpenPacket;
+import net.meh.cosmolib.crate.network.CrateUnlockPacket;
 import net.meh.cosmolib.furniture.tool.network.SyncBBSessionPayload;
 import net.meh.cosmolib.furniture.tool.network.ToggleBBSlabPayload;
 import net.meh.cosmolib.furniture.tool.network.UndoSelectionPayload;
@@ -15,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -71,5 +75,26 @@ public final class CommonEventHandler {
                 ToggleBBSlabPayload.TYPE,
                 ToggleBBSlabPayload.STREAM_CODEC,
                 ToggleBBSlabPayload::handle);
+
+        // Crate system payloads
+        reg.playToClient(
+                CrateOpenPacket.TYPE,
+                CrateOpenPacket.STREAM_CODEC,
+                CrateOpenPacket::handle);
+
+        reg.playToClient(
+                CrateUnlockPacket.TYPE,
+                CrateUnlockPacket.STREAM_CODEC,
+                CrateUnlockPacket::handle);
+
+        reg.playToClient(
+                CrateLuckSyncPacket.TYPE,
+                CrateLuckSyncPacket.STREAM_CODEC,
+                CrateLuckSyncPacket::handle);
+    }
+
+    @SubscribeEvent
+    public static void onAddReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(CrateLootTable.RELOAD_LISTENER);
     }
 }

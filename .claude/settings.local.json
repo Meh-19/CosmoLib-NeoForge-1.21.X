@@ -47,7 +47,18 @@
       "Bash(javap -p -c software/bernie/geckolib/renderer/GeoRenderer.class)",
       "Bash(javap -p -c software/bernie/geckolib/util/RenderUtil.class)",
       "Bash(python -c ' *)",
-      "Bash(dir /s /b \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\run\\\\config\\\\cosmolib\\\\hand_offsets.json\")"
+      "Bash(dir /s /b \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\\\\run\\\\config\\\\cosmolib\\\\hand_offsets.json\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pickn\\\\IdeaProjects\\\\CosmoLib-NeoForge-1.21.X\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(find /c/Users/pickn/.gradle -name \"GeoRenderLayer.class\" -o -name \"GeoRenderLayer.java\" 2>/dev/null | head -20)",
+      "Bash(find /c/Users/pickn -name \"geckolib*.jar\" 2>/dev/null | head -10)",
+      "Bash(javap -p software.bernie.geckolib.renderer.GeoEntityRenderer)",
+      "Bash(javap -classpath /c/Users/pickn/.gradle/caches/modules-2/files-2.1/software.bernie.geckolib/geckolib-neoforge-1.21.1/4.7.4/5e5f1d130c47e4daa93eaa76b0b62d4cba05c8b1/geckolib-neoforge-1.21.1-4.7.4.jar software.bernie.geckolib.renderer.GeoEntityRenderer)",
+      "Bash(javap -c -classpath /c/Users/pickn/.gradle/caches/modules-2/files-2.1/software.bernie.geckolib/geckolib-neoforge-1.21.1/4.7.4/5e5f1d130c47e4daa93eaa76b0b62d4cba05c8b1/geckolib-neoforge-1.21.1-4.7.4.jar software.bernie.geckolib.renderer.GeoEntityRenderer)",
+      "Bash(javap -verbose -classpath /c/Users/pickn/.gradle/caches/modules-2/files-2.1/software.bernie.geckolib/geckolib-neoforge-1.21.1/4.7.4/5e5f1d130c47e4daa93eaa76b0b62d4cba05c8b1/geckolib-neoforge-1.21.1-4.7.4.jar software.bernie.geckolib.renderer.GeoEntityRenderer)",
+      "Bash(find /c/Users/pickn/.gradle/caches -name \"neoforge-21.1*-universal.jar\")",
+      "Bash(javap -classpath /c/Users/pickn/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/21.1.230/23db558c44b8c05cb60c96cea0fab2242db94aa8/neoforge-21.1.230-universal.jar -p software.bernie.geckolib.renderer.GeoEntityRenderer)",
+      "Bash(javap -classpath /c/Users/pickn/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/21.1.230/23db558c44b8c05cb60c96cea0fab2242db94aa8/neoforge-21.1.230-universal.jar net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent)"
     ]
   },
   "hooks": {

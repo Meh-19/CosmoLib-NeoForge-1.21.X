@@ -17,5 +17,7 @@
   "key.cosmolib.open_cosmetics": "Open Cosmetics",
   "key.categories.cosmolib": "CosmoLib",
   "item.cosmolib.bounding_box_selector": "Bounding Box Selector",
-  "item.cosmolib.backswag_tuner": "Backswag Tuner"
+  "item.cosmolib.backswag_tuner": "Backswag Tuner",
+
+  "item.cosmolib.cosmetic_crate": "Cosmetic Crate"
 }

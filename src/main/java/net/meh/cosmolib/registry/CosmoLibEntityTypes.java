@@ -1,5 +1,6 @@
 package net.meh.cosmolib.registry;
 
+import net.meh.cosmolib.crate.entity.CrateEntity;
 import net.meh.cosmolib.entity.CosmeticMannequinEntity;
 import net.meh.cosmolib.entity.SeatEntity;
 import net.minecraft.core.registries.Registries;
@@ -30,6 +31,14 @@ public final class CosmoLibEntityTypes {
                             .clientTrackingRange(10)
                             .updateInterval(2)
                             .build("cosmetic_mannequin"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<CrateEntity>> CRATE_ENTITY =
+            ENTITY_TYPES.register("crate",
+                    () -> EntityType.Builder.<CrateEntity>of(CrateEntity::new, MobCategory.MISC)
+                            .sized(1.0f, 1.0f)
+                            .clientTrackingRange(16)
+                            .updateInterval(3)
+                            .build("crate"));
 
     private CosmoLibEntityTypes() {}
 }

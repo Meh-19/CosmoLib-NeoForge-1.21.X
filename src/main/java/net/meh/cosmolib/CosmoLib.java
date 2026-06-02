@@ -2,7 +2,10 @@ package net.meh.cosmolib;
 
 import net.meh.cosmolib.cosmetic.CosmeticRegistry;
 import net.meh.cosmolib.cosmetic.offset.BackOffsetManager;
+import net.meh.cosmolib.cosmetic.offset.HandOffsetData;
 import net.meh.cosmolib.cosmetic.offset.HandOffsetManager;
+import net.meh.cosmolib.crate.CrateRarityWeights;
+import net.meh.cosmolib.registry.CosmoLibCrates;
 import net.meh.cosmolib.entity.CosmeticMannequinEntity;
 import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
 import net.meh.cosmolib.furniture.layout.MultiBlockLayoutManager;
@@ -80,12 +83,18 @@ public class CosmoLib {
         CosmoLibEntityTypes.ENTITY_TYPES.register(modEventBus);
         CosmoLibCreativeTabs.CREATIVE_TABS.register(modEventBus);
 
+        // Register built-in crate types before any world loads
+        CosmoLibCrates.registerAll();
+
         // Register the library's own starter cosmetic
         modEventBus.addListener(this::onSetup);
     }
 
     private void onSetup(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            // Load global crate rarity weight table from config/cosmolib/crate_rarity_weights.json
+            CrateRarityWeights.load();
+
             CosmeticRegistry.register(CosmoLibItems.COSMO_HAT.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_ROBE.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_CANE.get(), true);
@@ -102,7 +111,13 @@ public class CosmoLib {
             // Load per-cosmetic back Y offsets from config/cosmolib/back_offsets.json
             BackOffsetManager.load();
 
-            // Load per-cosmetic hand X/Y/Z offsets from config/cosmolib/hand_offsets.json
+            // Register known hand offsets in code, then load JSON overrides on top.
+            // Offset values were tuned in-game with the Hand Tuner dev tool.
+            HandOffsetManager.register(
+                    ResourceLocation.fromNamespaceAndPath("unearthed", "glorified_gauntlet"),
+                    new HandOffsetData(-0.30, 0.625, -0.12, -90.0, 0.0, -180.0),  // left arm
+                    new HandOffsetData( 0.26, 0.625,  0.12,  90.0, 0.0, -180.0)   // right arm
+            );
             HandOffsetManager.load();
 
             // Dispenser behaviour: shoot a cosmetic mannequin into the world,

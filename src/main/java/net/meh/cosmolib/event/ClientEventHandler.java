@@ -9,6 +9,8 @@ import net.meh.cosmolib.cosmetic.client.MobHatClientCache;
 import net.meh.cosmolib.cosmetic.screen.CosmeticScreen;
 import net.meh.cosmolib.cosmetic.network.OpenCosmeticScreenPayload;
 import net.meh.cosmolib.cosmetic.screen.CosmeticMenu;
+import net.meh.cosmolib.crate.client.CrateHud;
+import net.meh.cosmolib.crate.client.CrateRenderer;
 import net.meh.cosmolib.entity.client.CosmeticMannequinRenderer;
 import net.meh.cosmolib.furniture.block.AbstractFurnitureBlock;
 import net.meh.cosmolib.entity.SeatEntity;
@@ -34,6 +36,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = CosmoLib.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -136,6 +139,8 @@ public final class ClientEventHandler {
         event.registerEntityRenderer(CosmoLibEntityTypes.SEAT.get(), NoopRenderer::new);
         event.registerEntityRenderer(CosmoLibEntityTypes.COSMETIC_MANNEQUIN.get(),
                 CosmeticMannequinRenderer::new);
+        event.registerEntityRenderer(CosmoLibEntityTypes.CRATE_ENTITY.get(),
+                CrateRenderer::new);
         event.registerBlockEntityRenderer(
                 CosmoLibBlockEntityTypes.FURNITURE_ENTITY.get(),
                 FurnitureBlockEntityRenderer::new);
@@ -168,7 +173,7 @@ public final class ClientEventHandler {
         for (CosmeticSlot slot : CosmeticSlot.values()) {
             for (CosmeticItem cosmeticItem : CosmeticItem.getBySlot(slot)) {
                 if (cosmeticItem.isPaintable()) {
-                    event.register(PaintColorProvider.INSTANCE, cosmeticItem);
+                    event.register(PaintColorProvider.COSMETIC, cosmeticItem);
                 }
             }
         }
@@ -183,5 +188,14 @@ public final class ClientEventHandler {
                 }
             }
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Crate HUD
+    // ------------------------------------------------------------------
+
+    @SubscribeEvent
+    public static void onRenderGui(RenderGuiEvent.Post event) {
+        CrateHud.onRenderGui(event);
     }
 }

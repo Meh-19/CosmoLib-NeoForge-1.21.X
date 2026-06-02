@@ -1,6 +1,9 @@
 package net.meh.cosmolib.paint;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Utilities for the finish (animated shader) system that sits on top of {@link PaintData}.
@@ -61,5 +64,43 @@ public final class PaintFinish {
     public static FinishType getFinish(ItemStack stack) {
         int stored = PaintData.getColor(stack);
         return stored < 0 ? null : FinishType.fromStoredColor(stored);
+    }
+
+    // ------------------------------------------------------------------
+    // Shared tooltip helper
+    // ------------------------------------------------------------------
+
+    /**
+     * Builds a single tooltip line describing {@code rgb}, or {@code null} when the
+     * value produces no meaningful description (negative / unrecognised).
+     *
+     * <ul>
+     *   <li>Finish colour → {@code "Snow Finish"} in the finish's representative colour.</li>
+     *   <li>Known solid shade → {@code "Painted Light Blue, Shade 3"} in the shade colour.</li>
+     *   <li>Unknown / custom RGB → {@code null}.</li>
+     * </ul>
+     *
+     * Used by both {@link net.meh.cosmolib.cosmetic.CosmeticItem} and
+     * {@link net.meh.cosmolib.item.PaintbrushItem}.
+     */
+    @Nullable
+    public static Component buildTooltipLine(int rgb) {
+        if (rgb < 0) return null;
+
+        FinishType finish = FinishType.fromStoredColor(rgb);
+        if (finish != null) {
+            return Component.literal(finish.getDisplayName() + " Finish")
+                    .withStyle(Style.EMPTY.withColor(finish.getRepresentativeColor()));
+        }
+
+        PaintColor.PaintMatch match = PaintColor.matchRgb(rgb);
+        if (match != null) {
+            return Component.literal(
+                    "Painted " + match.color().getDisplayName()
+                    + ", Shade " + match.shadeNumber())
+                    .withStyle(Style.EMPTY.withColor(rgb));
+        }
+
+        return null;
     }
 }

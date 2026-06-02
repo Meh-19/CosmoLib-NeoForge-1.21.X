@@ -3,16 +3,21 @@ package net.meh.cosmolib.item;
 import net.meh.cosmolib.furniture.block.AbstractFurnitureBlock;
 import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
 import net.meh.cosmolib.paint.PaintData;
+import net.meh.cosmolib.paint.PaintFinish;
 import net.meh.cosmolib.tag.CosmoLibTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -22,6 +27,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.particles.DustParticleOptions;
 import org.joml.Vector3f;
 
+import java.util.List;
+
 public class PaintbrushItem extends Item {
 
     public PaintbrushItem(Properties props) {
@@ -29,13 +36,18 @@ public class PaintbrushItem extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext ctx) {
-        Level level   = ctx.getLevel();
-        BlockPos pos  = ctx.getClickedPos();
-        ItemStack stack = ctx.getItemInHand();
+    public void appendHoverText(ItemStack stack, TooltipContext context,
+                                List<Component> tooltip, TooltipFlag flag) {
+        int rgb = getPaintColor(stack);
+        Component line = PaintFinish.buildTooltipLine(rgb);
+        if (line != null) tooltip.add(line);
+    }
 
-        int color = getPaintColor(stack);
-        if (color == -1) return InteractionResult.PASS;
+    @Override
+    public InteractionResult useOn(UseOnContext ctx) {
+        Level level     = ctx.getLevel();
+        BlockPos pos    = ctx.getClickedPos();
+        ItemStack stack = ctx.getItemInHand();
 
         BlockState state = level.getBlockState(pos);
         boolean canPaint = (state.getBlock() instanceof AbstractFurnitureBlock afb && afb.isPaintable())
@@ -44,6 +56,30 @@ public class PaintbrushItem extends Item {
 
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof FurnitureBlockEntity furniture)) return InteractionResult.PASS;
+
+        // ── Sneak + right-click: eyedropper — copy colour FROM furniture ──────
+        if (ctx.getPlayer() != null && ctx.getPlayer().isCrouching()) {
+            if (!furniture.isPainted()) return InteractionResult.PASS;
+
+            int copied = furniture.getPaintColor();
+            if (!level.isClientSide) {
+                PaintData.applyColor(stack, copied);
+                level.playSound(null, pos,
+                        SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 1.4f);
+                Component line = PaintFinish.buildTooltipLine(copied);
+                if (ctx.getPlayer() instanceof ServerPlayer sp) {
+                    sp.displayClientMessage(
+                            Component.literal("Copied: ").append(
+                                    line != null ? line : Component.literal("#" + Integer.toHexString(copied))),
+                            true);
+                }
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        // ── Normal right-click: paint the furniture ───────────────────────────
+        int color = getPaintColor(stack);
+        if (color == -1) return InteractionResult.PASS;
 
         if (!level.isClientSide) {
             furniture.setPaintColor(color);
@@ -56,8 +92,7 @@ public class PaintbrushItem extends Item {
         }
 
         level.playSound(null, pos,
-                net.minecraft.sounds.SoundEvents.DYE_USE,
-                net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 

@@ -34,7 +34,7 @@
 			"translation": [35.25, -6.25, -18.5]
 		},
 		"ground": {
-			"translation": [0, 13.25, 0],
+			"translation": [0, 1.5, 0],
 			"scale": [0.39, 0.39, 0.39]
 		},
 		"gui": {

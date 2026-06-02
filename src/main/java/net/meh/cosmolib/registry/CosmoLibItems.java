@@ -5,12 +5,13 @@ import net.meh.cosmolib.cosmetic.CosmeticItem;
 import net.meh.cosmolib.cosmetic.CosmeticRarity;
 import net.meh.cosmolib.cosmetic.CosmeticSlot;
 import net.meh.cosmolib.cosmetic.tool.BackswagTunerItem;
-import net.meh.cosmolib.cosmetic.tool.HandTunerItem;
+import net.meh.cosmolib.crate.item.CrateItem;
 import net.meh.cosmolib.furniture.item.FurnitureBlockItem;
 import net.meh.cosmolib.furniture.tool.BoundingBoxSelectorItem;
 import net.meh.cosmolib.item.CosmeticMannequinItem;
 import net.meh.cosmolib.item.PaintbrushItem;
 import net.meh.cosmolib.paint.PaintColor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -45,6 +46,7 @@ public final class CosmoLibItems {
                     CosmeticRarity.LIMITED,
                     true,
                     CosmeticDefault.color(PaintColor.LIGHT_BLUE, 7),
+                    ResourceLocation.fromNamespaceAndPath("cosmolib", "cosmetics/cosmo_hat"),
                     new Item.Properties()
             ));
 
@@ -54,6 +56,7 @@ public final class CosmoLibItems {
                     CosmeticRarity.LIMITED,
                     true,
                     CosmeticDefault.color(PaintColor.LIGHT_BLUE, 7),
+                    ResourceLocation.fromNamespaceAndPath("cosmolib", "cosmetics/cosmo_robe"),
                     new Item.Properties()
             ));
 
@@ -63,6 +66,7 @@ public final class CosmoLibItems {
                     CosmeticRarity.LIMITED,
                     true,
                     CosmeticDefault.color(PaintColor.LIGHT_BLUE, 7),
+                    ResourceLocation.fromNamespaceAndPath("cosmolib", "cosmetics/cosmo_cane"),
                     new Item.Properties()
             ));
 
@@ -77,6 +81,15 @@ public final class CosmoLibItems {
     public static final DeferredItem<FurnitureBlockItem> AGED_FLAG =
             ITEMS.register("aged_flag", () -> new FurnitureBlockItem(
                     CosmoLibBlocks.AGED_FLAG.get(), new Item.Properties()));
+
+    // ------------------------------------------------------------------
+    // Crate items — one per CrateType in CosmoLibCrates
+    // ------------------------------------------------------------------
+
+    /** The placeable item for the cosmetic crate. */
+    public static final DeferredItem<CrateItem> COSMETIC_CRATE =
+            ITEMS.register("cosmetic_crate", () -> new CrateItem(
+                    CosmoLibCrates.COSMETIC_CRATE, new Item.Properties()));
 
     // ------------------------------------------------------------------
     // Cosmetic Mannequin placement item
@@ -106,16 +119,6 @@ public final class CosmoLibItems {
      */
     public static final DeferredItem<BoundingBoxSelectorItem> BOUNDING_BOX_SELECTOR =
             ITEMS.register("bounding_box_selector", () -> new BoundingBoxSelectorItem(
-                    new Item.Properties().stacksTo(1)
-            ));
-
-    /**
-     * Developer tool for tuning the X/Y/Z render offset of hand cosmetics on the mannequin.
-     * Equip a hand cosmetic, hold this item, and scroll to adjust.
-     * Ctrl+Click saves to {@code config/cosmolib/hand_offsets.json}.
-     */
-    public static final DeferredItem<HandTunerItem> HAND_TUNER =
-            ITEMS.register("hand_tuner", () -> new HandTunerItem(
                     new Item.Properties().stacksTo(1)
             ));
 

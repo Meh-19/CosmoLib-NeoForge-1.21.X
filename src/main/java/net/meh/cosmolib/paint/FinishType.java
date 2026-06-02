@@ -11,20 +11,20 @@ package net.meh.cosmolib.paint;
  */
 public enum FinishType {
 
-    RAINBOW    (1,  "Rainbow",    0xFF4444),
-    GOLD       (2,  "Gold",       0xFFD700),
-    GALAXY     (3,  "Galaxy",     0x5500CC),
-    MOLTEN     (4,  "Molten",     0xFF4500),
-    BUBBLE     (5,  "Bubble",     0x00BFFF),
-    FLORAL     (6,  "Floral",     0xFF80C0),
-    MATRIX     (7,  "Matrix",     0x00FF41),
-    CHROME     (8,  "Chrome",     0xB8B8B8),
-    GLITCH     (9,  "Glitch",     0xFF00CC),
-    IRIDESCENT (10, "Iridescent", 0x80FFEE),
-    VOID       (11, "Void",       0x100820),
-    PEARL      (12, "Pearl",      0xFFF5E0),
-    PHANTOM    (13, "Phantom",    0x8B00FF),
-    SNOW       (14, "Snow",       0xE0F0FF);
+    RAINBOW (1,  "Rainbow", 0xFF4444),
+    GOLD    (2,  "Gold",    0xFFD700),
+    GALAXY  (3,  "Galaxy",  0x5500CC),
+    MOLTEN  (4,  "Molten",  0xFF4500),
+    BUBBLE  (5,  "Bubble",  0x00BFFF),
+    FLORAL  (6,  "Floral",  0xFF80C0),
+    MATRIX  (7,  "Matrix",  0x00FF41),
+    CHROME  (8,  "Chrome",  0xB8B8B8),
+    GLITCH  (9,  "Glitch",  0xFF00CC),
+    CUBED   (10, "Cubed",   0x80FFEE),
+    SCANNER (11, "Scanner", 0x100820),
+    PEARL   (12, "Pearl",   0xFFF5E0),
+    PHANTOM (13, "Phantom", 0x8B00FF),
+    SNOW    (14, "Snow",    0xE0F0FF);
 
     private final int    id;
     private final String displayName;

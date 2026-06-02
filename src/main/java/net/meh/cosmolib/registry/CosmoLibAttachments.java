@@ -1,5 +1,6 @@
 package net.meh.cosmolib.registry;
 
+import com.mojang.serialization.Codec;
 import net.meh.cosmolib.cosmetic.PlayerCosmeticsData;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -24,6 +25,16 @@ public final class CosmoLibAttachments {
             () -> AttachmentType.builder(PlayerCosmeticsData::new)
                     .serialize(PlayerCosmeticsData.CODEC)
                     .copyOnDeath()
+                    .build());
+
+    /**
+     * Per-player crate luck bonus (loyalty system).
+     * Persistent, NOT copied on death (losing everything resets luck intentionally).
+     */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Float>>
+            CRATE_LUCK = ATTACHMENT_TYPES.register("crate_luck",
+            () -> AttachmentType.builder(() -> 0.0f)
+                    .serialize(Codec.FLOAT)
                     .build());
 
     private CosmoLibAttachments() {}

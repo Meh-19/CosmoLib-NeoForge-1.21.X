@@ -28,7 +28,6 @@ public final class CosmoLibCreativeTabs {
                         output.accept(CosmoLibItems.AGED_FLAG.get());
                         output.accept(CosmoLibItems.BOUNDING_BOX_SELECTOR.get());
                         output.accept(CosmoLibItems.BACKSWAG_TUNER.get());
-                        output.accept(CosmoLibItems.HAND_TUNER.get());
                     })
                     .build());
 

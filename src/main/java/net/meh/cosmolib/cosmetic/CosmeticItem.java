@@ -1,6 +1,7 @@
 package net.meh.cosmolib.cosmetic;
 
 import net.meh.cosmolib.paint.PaintData;
+import net.meh.cosmolib.paint.PaintFinish;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -10,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
-
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,40 +36,54 @@ public class CosmeticItem extends Item {
     private final boolean         paintable;
     @Nullable
     private final CosmeticDefault defaultAppearance;
-
     /**
-     * Creates a cosmetic item with no default appearance (renders white until painted).
+     * ResourceLocation of the 3-D cosmetic model rendered on mannequins / players
+     * (e.g. {@code cosmolib:cosmetics/cosmo_cane}).
+     *
+     * <p>Null means "no 3-D model" — the token is shown in all contexts.
      */
-    public CosmeticItem(CosmeticSlot slot, CosmeticRarity rarity, boolean paintable, Properties props) {
-        this(slot, rarity, paintable, null, props);
+    @Nullable
+    private final ResourceLocation cosmeticModelId;
+
+    // ------------------------------------------------------------------
+    // Constructors
+    // ------------------------------------------------------------------
+
+    /** No default paint, no explicit 3-D model ID. */
+    public CosmeticItem(CosmeticSlot slot, CosmeticRarity rarity, boolean paintable,
+                        Properties props) {
+        this(slot, rarity, paintable, null, null, props);
+    }
+
+    /** Default paint, no explicit 3-D model ID. */
+    public CosmeticItem(CosmeticSlot slot, CosmeticRarity rarity, boolean paintable,
+                        @Nullable CosmeticDefault defaultAppearance, Properties props) {
+        this(slot, rarity, paintable, defaultAppearance, null, props);
+    }
+
+    /** No default paint, explicit 3-D model ID. */
+    public CosmeticItem(CosmeticSlot slot, CosmeticRarity rarity, boolean paintable,
+                        @Nullable ResourceLocation cosmeticModelId, Properties props) {
+        this(slot, rarity, paintable, null, cosmeticModelId, props);
     }
 
     /**
-     * Creates a cosmetic item with a default paint appearance baked directly into
-     * the item's data components, so it is present on <em>every</em> stack of this
-     * item regardless of how it was created — creative tab, {@code /give}, loot
-     * tables, {@code new ItemStack(item)}, etc.
+     * Full constructor — default paint + explicit 3-D model ID.
      *
-     * <p>Build the appearance with one of {@link CosmeticDefault}'s factories:
-     * <pre>{@code
-     * // Solid colour — shade 1 (lightest) to 7 (darkest)
-     * CosmeticDefault.color(PaintColor.BLUE, 3)
-     *
-     * // Animated finish
-     * CosmeticDefault.finish(FinishType.RAINBOW)
-     * }</pre>
-     *
-     * Pass {@code null} for no default (same as the 4-argument constructor).
+     * @param defaultAppearance paint baked into every stack (may be {@code null})
+     * @param cosmeticModelId   model shown when worn on mannequin/player
+     *                          (e.g. {@code cosmolib:cosmetics/cosmo_cane}); may be {@code null}
      */
     public CosmeticItem(CosmeticSlot slot, CosmeticRarity rarity, boolean paintable,
-                        @Nullable CosmeticDefault defaultAppearance, Properties props) {
+                        @Nullable CosmeticDefault defaultAppearance,
+                        @Nullable ResourceLocation cosmeticModelId,
+                        Properties props) {
         super(bakeDefault(defaultAppearance, props.stacksTo(1)));
         this.slot              = slot;
         this.rarity            = rarity;
         this.paintable         = paintable;
         this.defaultAppearance = defaultAppearance;
-        // Self-register so the mob spawn handler can find all hat cosmetics
-        // without needing any tag JSON file.
+        this.cosmeticModelId   = cosmeticModelId;
         SLOT_POOL.computeIfAbsent(slot, s -> new ArrayList<>()).add(this);
     }
 
@@ -108,15 +122,49 @@ public class CosmeticItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {
-        if (paintable) {
-            tooltip.add(Component.literal("ꑞ")
-                    .withStyle(Style.EMPTY.withFont(COSMOLIB_FONT)));
-        }
+        if (!paintable) return;
+
+        tooltip.add(Component.literal("ꑞ")
+                .withStyle(Style.EMPTY.withFont(COSMOLIB_FONT)));
+
+        // Paint description line — skipped when:
+        //  • no stored paint value
+        //  • matches this item's baked-in default appearance
+        //  • plain white (0xFFFFFF) — visually indistinguishable from unpainted
+        int rgb = PaintData.getColor(stack);
+        if (rgb < 0) return;
+        if ((rgb & 0xFFFFFF) == 0xFFFFFF) return;
+        if (defaultAppearance != null && rgb == defaultAppearance.getRawRgb()) return;
+
+        Component line = PaintFinish.buildTooltipLine(rgb);
+        if (line != null) tooltip.add(line);
     }
+
+    // ------------------------------------------------------------------
+    // Accessors
+    // ------------------------------------------------------------------
 
     public CosmeticSlot      getSlot()               { return slot;              }
     public CosmeticRarity    getRarity()              { return rarity;            }
     public boolean           isPaintable()            { return paintable;         }
     @Nullable
     public CosmeticDefault   getDefaultAppearance()   { return defaultAppearance; }
+
+    /**
+     * The ResourceLocation of the 3-D cosmetic model (e.g. {@code cosmolib:cosmetics/cosmo_cane}).
+     * Used by the mannequin renderer and the token BEWLR when not in a display context.
+     * May be {@code null} if no 3-D model was registered.
+     */
+    @Nullable
+    public ResourceLocation getCosmeticModelId()  { return cosmeticModelId; }
+
+    /**
+     * The ResourceLocation of this item's flat token model, derived from its
+     * slot and rarity (e.g. {@code cosmolib:item/token/limited_hand_token}).
+     */
+    public ResourceLocation getTokenModelId() {
+        return ResourceLocation.fromNamespaceAndPath("cosmolib",
+                "item/token/" + rarity.name().toLowerCase()
+                + "_" + slot.name().toLowerCase() + "_token");
+    }
 }

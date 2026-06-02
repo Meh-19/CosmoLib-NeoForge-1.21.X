@@ -3,6 +3,7 @@ package net.meh.cosmolib.event;
 import net.meh.cosmolib.CosmoLib;
 import net.meh.cosmolib.cosmetic.client.MobHatClientCache;
 import net.meh.cosmolib.cosmetic.network.OpenCosmeticScreenPayload;
+import net.meh.cosmolib.crate.client.CrateCameraController;
 import net.meh.cosmolib.furniture.tool.client.BoundingBoxClientState;
 import net.meh.cosmolib.furniture.tool.client.BoundingBoxRenderer;
 import net.meh.cosmolib.furniture.tool.network.ToggleBBSlabPayload;
@@ -14,7 +15,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -52,6 +55,9 @@ public final class ClientGameEventHandler {
                 PacketDistributor.sendToServer(new ToggleBBSlabPayload());
             }
         }
+
+        // Advance crate camera lerp and maintain camera lock / movement penalties
+        CrateCameraController.tick();
     }
 
     /** Clear the mob hat cache and BB client state whenever this client disconnects. */
@@ -65,5 +71,24 @@ public final class ClientGameEventHandler {
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
         BoundingBoxRenderer.render(event);
+    }
+
+    /**
+     * Computes the locked camera angle per rendered frame.
+     * Using a per-frame hook (rather than the per-tick {@code onClientTick}) means
+     * the camera tracks the crate using the render partial-tick player position,
+     * eliminating the tick-rate jitter that causes choppiness when moving.
+     */
+    @SubscribeEvent
+    public static void onComputeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+        CrateCameraController.onComputeCameraAngles(event);
+    }
+
+    /** Suppress scroll input while the crate camera is locked. */
+    @SubscribeEvent
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+        if (CrateCameraController.shouldCancelScroll()) {
+            event.setCanceled(true);
+        }
     }
 }
