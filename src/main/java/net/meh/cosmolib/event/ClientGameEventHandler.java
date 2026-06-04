@@ -31,6 +31,17 @@ public final class ClientGameEventHandler {
     private ClientGameEventHandler() {}
 
     /**
+     * Injects skin information into the tooltip of any tool that has a
+     * {@link ToolSkinData} component applied to it.
+     *
+     * <p>Adds two lines after vanilla's own tooltip lines:
+     * <ol>
+     *   <li>{@code [tool glyph] + <setName> Skin} — glyph via {@code cosmolib:default} font,
+     *       set name in rarity colour, " Skin" in white.</li>
+     *   <li>Exclusive tag in its configured colour — only when present.</li>
+     * </ol>
+     */
+    /**
      * Polls the cosmetic-screen keybind and the BB-undo keybind each tick.
      * Must run on the GAME bus so it fires during active gameplay.
      */

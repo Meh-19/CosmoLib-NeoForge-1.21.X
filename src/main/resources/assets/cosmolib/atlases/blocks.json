@@ -4,6 +4,35 @@
       "type": "directory",
       "source": "furniture",
       "prefix": "furniture/"
+    },
+    {
+      "type": "directory",
+      "source": "tool_skins",
+      "prefix": "tool_skins/"
+    },
+    {
+      "type": "single",
+      "resource": "cosmolib:tool_skins/easter_sword"
+    },
+    {
+      "type": "single",
+      "resource": "cosmolib:tool_skins/easter_axe"
+    },
+    {
+      "type": "single",
+      "resource": "cosmolib:tool_skins/easter_bow"
+    },
+    {
+      "type": "single",
+      "resource": "cosmolib:tool_skins/easter_hoe"
+    },
+    {
+      "type": "single",
+      "resource": "cosmolib:tool_skins/easter_pickaxe"
+    },
+    {
+      "type": "single",
+      "resource": "cosmolib:tool_skins/easter_shovel"
     }
   ]
 }

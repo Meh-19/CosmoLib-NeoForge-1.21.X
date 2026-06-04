@@ -1,6 +1,7 @@
 package net.meh.cosmolib;
 
 import net.meh.cosmolib.cosmetic.CosmeticRegistry;
+import net.meh.cosmolib.toolskin.ToolSkinRegistry;
 import net.meh.cosmolib.cosmetic.offset.BackOffsetManager;
 import net.meh.cosmolib.cosmetic.offset.HandOffsetData;
 import net.meh.cosmolib.cosmetic.offset.HandOffsetManager;
@@ -10,6 +11,8 @@ import net.meh.cosmolib.entity.CosmeticMannequinEntity;
 import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
 import net.meh.cosmolib.furniture.layout.MultiBlockLayoutManager;
 import net.meh.cosmolib.registry.*;
+import net.meh.cosmolib.registry.CosmoLibDataComponents;
+import net.meh.cosmolib.registry.CosmoLibRecipeTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
@@ -82,6 +85,9 @@ public class CosmoLib {
         CosmoLibAttachments.ATTACHMENT_TYPES.register(modEventBus);
         CosmoLibEntityTypes.ENTITY_TYPES.register(modEventBus);
         CosmoLibCreativeTabs.CREATIVE_TABS.register(modEventBus);
+        CosmoLibDataComponents.DATA_COMPONENTS.register(modEventBus);
+        CosmoLibRecipeTypes.RECIPE_TYPES.register(modEventBus);
+        CosmoLibRecipeTypes.RECIPE_SERIALIZERS.register(modEventBus);
 
         // Register built-in crate types before any world loads
         CosmoLibCrates.registerAll();
@@ -98,6 +104,14 @@ public class CosmoLib {
             CosmeticRegistry.register(CosmoLibItems.COSMO_HAT.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_ROBE.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_CANE.get(), true);
+
+            // Easter 2021 demo tool skins
+            ToolSkinRegistry.register(CosmoLibItems.EASTER_AXE_SKIN.get());
+            ToolSkinRegistry.register(CosmoLibItems.EASTER_BOW_SKIN.get());
+            ToolSkinRegistry.register(CosmoLibItems.EASTER_HOE_SKIN.get());
+            ToolSkinRegistry.register(CosmoLibItems.EASTER_PICKAXE_SKIN.get());
+            ToolSkinRegistry.register(CosmoLibItems.EASTER_SHOVEL_SKIN.get());
+            ToolSkinRegistry.register(CosmoLibItems.EASTER_SWORD_SKIN.get());
 
             // Example animated furniture — remove alongside CosmoLibBlocks.AGED_FLAG
             AnimatedFurnitureBlock.registerAnimation(

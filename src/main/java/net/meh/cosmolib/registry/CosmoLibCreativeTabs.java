@@ -1,6 +1,7 @@
 package net.meh.cosmolib.registry;
 
 import net.meh.cosmolib.cosmetic.CosmeticRegistry;
+import net.meh.cosmolib.toolskin.ToolSkinRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -41,6 +42,24 @@ public final class CosmoLibCreativeTabs {
                     })
                     .displayItems((params, output) ->
                             CosmeticRegistry.getTabEntries().forEach(output::accept))
+                    .build());
+
+    /**
+     * Tool Skins tab: all registered {@link net.meh.cosmolib.toolskin.ToolSkinItem}s
+     * across all mods, auto-populated from {@link ToolSkinRegistry}.
+     *
+     * <p>Dependent mods call {@link ToolSkinRegistry#register} during their mod
+     * setup to have their skins appear here automatically.
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TOOL_SKINS_TAB =
+            CREATIVE_TABS.register("tool_skins_tab", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.cosmolib.tool_skins"))
+                    .icon(() -> {
+                        var skins = ToolSkinRegistry.getAll();
+                        return skins.isEmpty() ? ItemStack.EMPTY : new ItemStack(skins.get(0));
+                    })
+                    .displayItems((params, output) ->
+                            ToolSkinRegistry.getAll().forEach(output::accept))
                     .build());
 
     private CosmoLibCreativeTabs() {}
