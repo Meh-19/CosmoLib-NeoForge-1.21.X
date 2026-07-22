@@ -234,7 +234,7 @@ public class PaintingTableScreen extends AbstractContainerScreen<PaintingTableMe
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         graphics.drawString(font, title, titleLabelX, titleLabelY, 0x404040, false);
-        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
+        // Inventory label intentionally omitted — it overlaps the custom UI.
     }
 
     // -----------------------------------------------------------------------

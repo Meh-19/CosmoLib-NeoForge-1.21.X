@@ -1,0 +1,12 @@
+{
+  "common":    [],
+  "rare":      [],
+  "epic":      [],
+  "legendary": [],
+  "limited": [
+    "cosmolib:cosmo_hat",
+    "cosmolib:cosmo_robe",
+    "cosmolib:cosmo_cane",
+    "cosmolib:cosmo_rug"
+  ]
+}

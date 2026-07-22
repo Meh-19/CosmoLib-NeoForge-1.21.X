@@ -26,26 +26,54 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Renders static furniture items using ItemDisplayContext.FIXED, mirroring
- * Argon's ArtifactDisplayBlockEntityRenderer exactly.
+ * Renders static furniture items using {@link ItemDisplayContext#FIXED}.
  *
- * Display mode is driven by FurnitureDisplayModeProvider (block implements it);
- * blocks that don't implement it fall back to TOP_FACE.
+ * <h3>Frustum culling</h3>
+ * {@link #shouldRenderOffScreen} returns {@code true} so that furniture whose anchor
+ * block drifts just outside the camera frustum does not pop out of view while the rest
+ * of the model is still visible.  The GPU still clips truly off-screen geometry before
+ * rasterisation, so there is no visual or frame-rate downside.
  *
+ * <h3>ItemStack caching</h3>
+ * {@link FurnitureBlockEntity#getCachedRenderStack(Item)} is used instead of allocating
+ * a fresh {@link ItemStack} on every frame, saving GC pressure for furniture with a
+ * static paint color.
+ *
+ * Display modes:
+ * <pre>
  *   TOP_FACE  — translate(0.5, 0.999, 0.5) + X+180 + X+90 + Z+180 + Z(-rot*45)
  *   FLOOR     — translate(0.5, 0.0,   0.5) + X+90  + Z+180 + Z(+rot*45)
  *   BLOCK_UP  — translate(0.5, 1.0,   0.5) + X+90  + Z+180 + Z(+rot*45)
  *   WALL      — translate(0.5, 0.5,   0.5) + Y(from facing) + translate(0,0,0.45)
- *
- * A 0.5 pre-scale counteracts the typical 2x scale in model "fixed" display transforms.
+ * </pre>
+ * A 0.5 pre-scale counteracts the typical 2× scale in model "fixed" display transforms.
  */
 public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<FurnitureBlockEntity> {
 
     public FurnitureBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {}
 
+    /**
+     * Disables the vanilla 1×1×1 anchor-block frustum check.
+     *
+     * <p>Vanilla's {@code LevelRenderer} culls block entities whose single anchor block
+     * sits outside the camera frustum.  For furniture models that visually extend beyond
+     * that block (tall cabinets, wide sofas, multi-block pieces) this causes the model to
+     * vanish while it is still clearly in view.
+     *
+     * <p>Returning {@code true} here tells the engine to skip that check and always
+     * dispatch this renderer when the containing chunk section is loaded.  The GPU still
+     * clips geometry that is truly off-screen before rasterisation, so there is no
+     * rendering artefact — only the unnecessary CPU frustum-cull is removed.
+     */
+    @Override
+    public boolean shouldRenderOffScreen(FurnitureBlockEntity entity) {
+        return true;
+    }
+
     @Override
     public void render(FurnitureBlockEntity entity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+
         if (entity.getLevel() == null) return;
 
         BlockState state = entity.getBlockState();
@@ -56,66 +84,84 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
             return;
         }
 
-        // Resolve item and model. Ceiling/wall variants have no BlockItem of their own,
-        // so we try to find their "item/<name>#standalone" model first. If found
-        // (registered via ModelEvent.RegisterAdditional by the dependent mod) we render
-        // that model directly while still using the floor item's stack for paint color
-        // data. This lets mods provide a dedicated ceiling model without a separate Item.
+        // Mark this BE as rendered for the current frame so the global fallback
+        // pass (ClientRenderEventHandler) knows it was already drawn and can skip it.
+        entity.lastRenderedClientFrame = FurnitureBlockEntity.clientFrameCounter;
+
         Item item = state.getBlock().asItem();
-        ItemStack stack;
+
+        // ------------------------------------------------------------------
+        // Fast path: block has an associated item.
+        // Use the cached ItemStack to avoid a fresh allocation every frame.
+        // ------------------------------------------------------------------
+        if (item != Items.AIR) {
+            ItemStack stack = entity.getCachedRenderStack(item);
+            if (!stack.isEmpty()) {
+                renderNormalWithItem(state, stack, poseStack, bufferSource,
+                                     packedLight, packedOverlay, null, entity);
+                return;
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Fallback: no BlockItem (ceiling/wall variants) or override model.
+        // ------------------------------------------------------------------
+        renderUncached(entity, state, item, poseStack, bufferSource, packedLight, packedOverlay);
+    }
+
+    // ------------------------------------------------------------------
+    // Fallback rendering (no-BlockItem / override-model path)
+    // ------------------------------------------------------------------
+
+    private void renderUncached(FurnitureBlockEntity entity, BlockState state, Item item,
+                                 PoseStack poseStack, MultiBufferSource bufferSource,
+                                 int packedLight, int packedOverlay) {
+
         BakedModel overrideModel = null;
         int paintColor = entity.getPaintColor();
 
-        if (item != Items.AIR) {
-            stack = new ItemStack(item);
-            if (paintColor >= 0) PaintData.applyColor(stack, paintColor);
-        } else {
-            // No item for this block — check whether a dedicated model was registered as
-            // "item/<name>#standalone" via ModelEvent.RegisterAdditional.
-            // The full "item/" prefix is needed because that's how NeoForge resolves
-            // the model file: assets/<ns>/models/item/<name>.json.
-            ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-            if (blockId != null) {
-                Minecraft mc = Minecraft.getInstance();
-                ResourceLocation itemModelId = ResourceLocation.fromNamespaceAndPath(
-                        blockId.getNamespace(), "item/" + blockId.getPath());
-                BakedModel candidate = mc.getModelManager()
-                        .getModel(new ModelResourceLocation(itemModelId, "standalone"));
-                if (candidate != mc.getModelManager().getMissingModel()) {
-                    overrideModel = candidate;
-                }
+        // No BlockItem — look for a dedicated "item/<name>#standalone" model.
+        ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        if (blockId != null) {
+            Minecraft mc = Minecraft.getInstance();
+            ResourceLocation itemModelId = ResourceLocation.fromNamespaceAndPath(
+                    blockId.getNamespace(), "item/" + blockId.getPath());
+            BakedModel candidate = mc.getModelManager()
+                    .getModel(new ModelResourceLocation(itemModelId, "standalone"));
+            if (candidate != mc.getModelManager().getMissingModel()) {
+                overrideModel = candidate;
             }
-            // Fall back to the floor item (gives paint color + drop-as item).
-            stack = state.getBlock().getCloneItemStack(entity.getLevel(), entity.getBlockPos(), state);
-            if (stack.isEmpty()) return;
-            // Apply paint color from the block entity onto the fallback stack.
-            if (paintColor >= 0) PaintData.applyColor(stack, paintColor);
         }
+
+        ItemStack stack = state.getBlock().getCloneItemStack(entity.getLevel(), entity.getBlockPos(), state);
         if (stack.isEmpty()) return;
+        if (paintColor >= 0) PaintData.applyColor(stack, paintColor);
 
-        // Water variant: if the block is waterlogged and a <name>_water standalone model
-        // exists (registered via ModelEvent.RegisterAdditional), switch to it.
-        if (state.hasProperty(BlockStateProperties.WATERLOGGED)
+        // Water variant override.
+        if (blockId != null
+                && state.hasProperty(BlockStateProperties.WATERLOGGED)
                 && state.getValue(BlockStateProperties.WATERLOGGED)) {
-            ResourceLocation bid = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-            if (bid != null) {
-                Minecraft mc = Minecraft.getInstance();
-                BakedModel wm = mc.getModelManager().getModel(new ModelResourceLocation(
-                        ResourceLocation.fromNamespaceAndPath(bid.getNamespace(), "item/" + bid.getPath() + "_water"),
-                        "standalone"));
-                if (wm != mc.getModelManager().getMissingModel()) overrideModel = wm;
-            }
+            Minecraft mc = Minecraft.getInstance();
+            BakedModel wm = mc.getModelManager().getModel(new ModelResourceLocation(
+                    ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(),
+                            "item/" + blockId.getPath() + "_water"), "standalone"));
+            if (wm != mc.getModelManager().getMissingModel()) overrideModel = wm;
         }
 
+        renderNormalWithItem(state, stack, poseStack, bufferSource, packedLight, packedOverlay,
+                             overrideModel, entity);
+    }
+
+    /** Renders {@code stack} into the live buffer source with the correct display transform. */
+    private static void renderNormalWithItem(BlockState state, ItemStack stack,
+                                              PoseStack poseStack, MultiBufferSource bufferSource,
+                                              int packedLight, int packedOverlay,
+                                              @Nullable BakedModel overrideModel,
+                                              FurnitureBlockEntity entity) {
         poseStack.pushPose();
         applyDisplayTransform(poseStack, state, stack);
 
         if (overrideModel != null) {
-            // All display modes (including CEILING) use FIXED context with a 0.5 pre-scale
-            // so ceiling models appear at the same visual size as floor furniture.
-            // applyDisplayTransform already handled position and Y-rotation; FIXED then
-            // applies the model's display.fixed scale (typically 2×), and the 0.5 pre-scale
-            // in applyDisplayTransform brings the net result back to 1×.
             Minecraft.getInstance().getItemRenderer().render(
                     stack, ItemDisplayContext.FIXED, false,
                     poseStack, bufferSource, packedLight, packedOverlay, overrideModel);
@@ -128,10 +174,13 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
         poseStack.popPose();
     }
 
+    // ------------------------------------------------------------------
+    // Display transform helpers (public for use by animated renderer etc.)
+    // ------------------------------------------------------------------
+
     /**
      * Applies the display-mode-specific pre-transforms for this block state.
-     * Call this inside a pushPose/popPose pair before the item render call.
-     * Matches Argon's ArtifactDisplayBlockEntityRenderer transform logic exactly.
+     * Call inside a pushPose/popPose pair before the item render call.
      */
     public static void applyDisplayTransform(PoseStack poseStack, BlockState state) {
         applyDisplayTransform(poseStack, state, null);
@@ -141,7 +190,8 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
      * Same as {@link #applyDisplayTransform(PoseStack, BlockState)} but accepts an
      * already-resolved ItemStack (unused; kept for API compatibility).
      */
-    public static void applyDisplayTransform(PoseStack poseStack, BlockState state, @Nullable ItemStack stack) {
+    public static void applyDisplayTransform(PoseStack poseStack, BlockState state,
+                                              @Nullable ItemStack stack) {
         FurnitureDisplayMode mode = state.getBlock() instanceof FurnitureDisplayModeProvider p
                 ? p.getDisplayMode(state)
                 : FurnitureDisplayMode.TOP_FACE;
@@ -150,8 +200,6 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
 
         switch (mode) {
             case CEILING -> {
-                // Uses FIXED context + 0.5 pre-scale (same as all other modes) so the
-                // ceiling model appears at the same visual size as floor furniture.
                 poseStack.translate(0.5, 1.0, 0.5);
                 if (state.hasProperty(AbstractFurnitureBlock.ROTATION)) {
                     int rot = state.getValue(AbstractFurnitureBlock.ROTATION);
@@ -166,10 +214,6 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
                     Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
                     poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
                 } else if (state.hasProperty(AbstractFurnitureBlock.ROTATION)) {
-                    // CosmoLib WallFurnitureBlock encodes direction in ROTATION.
-                    // With FACE_OFFSET=0: 0=faces-North, 2=faces-East, 4=faces-South, 6=faces-West.
-                    // The old formula was rot*45-180; with FACE_OFFSET shift of -4 steps (-180°)
-                    // the net formula becomes rot*45-180+180 = rot*45.
                     int rot = state.getValue(AbstractFurnitureBlock.ROTATION);
                     poseStack.mulPose(Axis.YP.rotationDegrees(rot * 45.0f));
                 }
@@ -205,9 +249,6 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
     private static void applyRotation(PoseStack poseStack, BlockState state, float sign) {
         if (state.hasProperty(AbstractFurnitureBlock.ROTATION)) {
             int rot = state.getValue(AbstractFurnitureBlock.ROTATION);
-            // +180° compensates for the FACE_OFFSET=0 shift: the rotation index is now
-            // 4 lower than before (player-facing-South → rot=0 instead of rot=4), so
-            // we add 180° back to keep the displayed model facing the correct direction.
             poseStack.mulPose(Axis.ZP.rotationDegrees(sign * rot * 45.0f + 180.0f));
         } else if (state.hasProperty(BlockStateProperties.ROTATION_16)) {
             int rot = state.getValue(BlockStateProperties.ROTATION_16);

@@ -1,6 +1,7 @@
 {
   "itemGroup.cosmolib": "CosmoLib",
   "itemGroup.cosmolib.cosmetics": "Cosmetics",
+  "itemGroup.cosmolib.tool_skins": "Tool Skins",
 
   "block.cosmolib.painting_table": "Painting Table",
 
@@ -19,5 +20,7 @@
   "item.cosmolib.bounding_box_selector": "Bounding Box Selector",
   "item.cosmolib.backswag_tuner": "Backswag Tuner",
 
-  "item.cosmolib.cosmetic_crate": "Cosmetic Crate"
+  "item.cosmolib.cosmetic_crate": "Cosmetic Crate",
+
+  "tooltip.cosmolib.fragile_broken": "This Furniture is fragile! Maybe there are other ways to obtain this. . ."
 }

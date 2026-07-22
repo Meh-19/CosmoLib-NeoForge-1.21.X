@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.tags.FluidTags;
@@ -82,6 +83,18 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock
      * Only has any effect when {@link #waterloggable} is {@code true}.
      */
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+
+    /**
+     * Runtime fragile flag — toggled with the debug stick by structure developers.
+     * When {@code true}, the block is destroyed without dropping an item and the
+     * player who broke it receives a chat message explaining how to obtain the item.
+     *
+     * <p>Defaults to {@code false} on placement. Structure developers set this to
+     * {@code true} on individual placed blocks to mark furniture as non-obtainable
+     * through normal mining — useful for decorating generated structures while still
+     * allowing players to obtain the item through other means (loot, crafting, etc.).
+     */
+    public static final BooleanProperty FRAGILE = BooleanProperty.create("fragile");
 
     // ------------------------------------------------------------------
     // Internal constants
@@ -179,7 +192,8 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock
         this.dropAsBlock       = opts.getDropAsBlock();
         registerDefaultState(stateDefinition.any()
                 .setValue(ROTATION, 0)
-                .setValue(WATERLOGGED, false));
+                .setValue(WATERLOGGED, false)
+                .setValue(FRAGILE, false));
     }
 
     // ------------------------------------------------------------------
@@ -232,7 +246,7 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(ROTATION, WATERLOGGED);
+        builder.add(ROTATION, WATERLOGGED, FRAGILE);
     }
 
     // ------------------------------------------------------------------
@@ -463,17 +477,41 @@ public abstract class AbstractFurnitureBlock extends BaseEntityBlock
 
     /**
      * Drops the block item with its paint color preserved.
-     * Fragile blocks are silently destroyed with no drop.
-     * Wall/ceiling variants drop the floor item when {@code dropAsBlock} is set.
+     *
+     * <p>Fragile blocks are destroyed with no item drop and send the player an
+     * action-bar message explaining why nothing was dropped.
+     *
+     * <p>Wall/ceiling variants drop the floor item when {@code dropAsBlock} is set.
+     *
+     * <p>The drop is unconditional with respect to the block entity: if the BE is
+     * present and typed correctly the paint color is carried over; if it is absent
+     * (e.g. BE type validation failed because the block was not listed in its
+     * {@link net.minecraft.world.level.block.entity.BlockEntityType}) the plain item
+     * still drops so the player is not left with nothing.
      */
     @Override
     public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state,
                                @Nullable BlockEntity be, ItemStack tool) {
-        if (!fragile && !level.isClientSide && be instanceof FurnitureBlockEntity fbe) {
-            ItemStack drop = new ItemStack(resolveDropBlock());
-            int color = fbe.getPaintColor();
-            if (color >= 0) PaintData.applyColor(drop, color);
-            popResource(level, pos, drop);
+        if (!level.isClientSide) {
+            // Read fragility exclusively from the block state so the debug stick
+            // is always authoritative.  The compile-time flag only sets the default
+            // via registerDefaultState — it is not re-checked here.
+            boolean isFragile = state.getValue(FRAGILE);
+            if (isFragile) {
+                // Send a chat message only to the player who broke it explaining why
+                // nothing dropped. Sent as a system message so it appears in chat.
+                player.sendSystemMessage(
+                        Component.translatable("tooltip.cosmolib.fragile_broken")
+                                .withStyle(Style.EMPTY.withColor(0xD92625)));
+            } else {
+                // Always drop the item; apply paint color when the BE is available.
+                ItemStack drop = new ItemStack(resolveDropBlock());
+                if (be instanceof FurnitureBlockEntity fbe) {
+                    int color = fbe.getPaintColor();
+                    if (color >= 0) PaintData.applyColor(drop, color);
+                }
+                if (!drop.isEmpty()) popResource(level, pos, drop);
+            }
         }
         // super handles XP, food exhaustion, and stat tracking — but NOT loot-table
         // drops (no loot table is provided for furniture; drops are handled above).

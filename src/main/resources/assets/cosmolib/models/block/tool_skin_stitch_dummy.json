@@ -1,0 +1,10 @@
+{
+  "textures": {
+    "easter_sword": "cosmolib:tool_skins/easter_sword",
+    "easter_axe": "cosmolib:tool_skins/easter_axe",
+    "easter_bow": "cosmolib:tool_skins/easter_bow",
+    "easter_hoe": "cosmolib:tool_skins/easter_hoe",
+    "easter_pickaxe": "cosmolib:tool_skins/easter_pickaxe",
+    "easter_shovel": "cosmolib:tool_skins/easter_shovel"
+  }
+}

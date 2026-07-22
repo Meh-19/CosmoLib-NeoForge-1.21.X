@@ -11,6 +11,14 @@ import net.meh.cosmolib.entity.CosmeticMannequinEntity;
 import net.meh.cosmolib.furniture.block.AnimatedFurnitureBlock;
 import net.meh.cosmolib.furniture.layout.MultiBlockLayoutManager;
 import net.meh.cosmolib.registry.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+
+import java.lang.reflect.Field;
+import java.util.AbstractSet;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
 import net.meh.cosmolib.registry.CosmoLibDataComponents;
 import net.meh.cosmolib.registry.CosmoLibRecipeTypes;
 import net.minecraft.core.BlockPos;
@@ -98,20 +106,18 @@ public class CosmoLib {
 
     private void onSetup(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            // Patch furniture block entity types to accept any block.
+            // BlockEntity.validateBlockState checks BlockEntityType.validBlocks (a Set.of()),
+            // which only contains the single sentinel block used at registration time.
+            // Dependent mods use their own block classes that must pass this check too.
+            patchFurnitureEntityValidBlocks();
+
             // Load global crate rarity weight table from config/cosmolib/crate_rarity_weights.json
             CrateRarityWeights.load();
 
             CosmeticRegistry.register(CosmoLibItems.COSMO_HAT.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_ROBE.get(), true);
             CosmeticRegistry.register(CosmoLibItems.COSMO_CANE.get(), true);
-
-            // Easter 2021 demo tool skins
-            ToolSkinRegistry.register(CosmoLibItems.EASTER_AXE_SKIN.get());
-            ToolSkinRegistry.register(CosmoLibItems.EASTER_BOW_SKIN.get());
-            ToolSkinRegistry.register(CosmoLibItems.EASTER_HOE_SKIN.get());
-            ToolSkinRegistry.register(CosmoLibItems.EASTER_PICKAXE_SKIN.get());
-            ToolSkinRegistry.register(CosmoLibItems.EASTER_SHOVEL_SKIN.get());
-            ToolSkinRegistry.register(CosmoLibItems.EASTER_SWORD_SKIN.get());
 
             // Example animated furniture — remove alongside CosmoLibBlocks.AGED_FLAG
             AnimatedFurnitureBlock.registerAnimation(
@@ -128,7 +134,7 @@ public class CosmoLib {
             // Register known hand offsets in code, then load JSON overrides on top.
             // Offset values were tuned in-game with the Hand Tuner dev tool.
             HandOffsetManager.register(
-                    ResourceLocation.fromNamespaceAndPath("unearthed", "glorified_gauntlet"),
+                    ResourceLocation.fromNamespaceAndPath("cosmolib", "cosmo_cane"),
                     new HandOffsetData(-0.30, 0.625, -0.12, -90.0, 0.0, -180.0),  // left arm
                     new HandOffsetData( 0.26, 0.625,  0.12,  90.0, 0.0, -180.0)   // right arm
             );
@@ -163,5 +169,21 @@ public class CosmoLib {
                         }
                     });
         });
+    }
+
+    private static void patchFurnitureEntityValidBlocks() {
+        Set<Block> allBlocks = new AbstractSet<>() {
+            @Override public boolean contains(Object o) { return true; }
+            @Override public Iterator<Block> iterator() { return Collections.emptyIterator(); }
+            @Override public int size() { return 0; }
+        };
+        try {
+            Field f = BlockEntityType.class.getDeclaredField("validBlocks");
+            f.setAccessible(true);
+            f.set(CosmoLibBlockEntityTypes.FURNITURE_ENTITY.get(), allBlocks);
+            f.set(CosmoLibBlockEntityTypes.ANIMATED_FURNITURE_ENTITY.get(), allBlocks);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.error("[CosmoLib] Failed to patch furniture block entity valid-blocks set — dependent-mod furniture blocks will crash on placement", e);
+        }
     }
 }

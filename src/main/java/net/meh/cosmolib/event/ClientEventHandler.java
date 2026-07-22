@@ -198,4 +198,5 @@ public final class ClientEventHandler {
     public static void onRenderGui(RenderGuiEvent.Post event) {
         CrateHud.onRenderGui(event);
     }
+
 }

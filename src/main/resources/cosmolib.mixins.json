@@ -3,10 +3,14 @@
   "package": "net.meh.cosmolib.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "HumanoidArmorLayerMixin"
+    "HumanoidArmorLayerMixin",
+    "ItemCombinerMenuMixin",
+    "SmithingMenuMixin"
   ],
   "client": [
-    "ItemStackTooltipMixin"
+    "AbstractContainerScreenMixin",
+    "ItemStackTooltipMixin",
+    "SmithingScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

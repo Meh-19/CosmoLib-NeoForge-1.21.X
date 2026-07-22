@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.meh.cosmolib.furniture.block.AbstractFurnitureBlock;
 import net.meh.cosmolib.furniture.blockentity.AnimatedFurnitureBlockEntity;
+import net.meh.cosmolib.furniture.blockentity.FurnitureBlockEntity;
 import net.meh.cosmolib.furniture.client.model.IdBasedFurnitureModel;
 import net.meh.cosmolib.paint.PaintFinish;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -52,6 +53,10 @@ public class AnimatedFurnitureBlockEntityRenderer extends GeoBlockRenderer<Anima
     public void render(AnimatedFurnitureBlockEntity tile, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource,
                        int packedLight, int packedOverlay) {
+        // Stamp the frame counter so the global fallback pass (ClientRenderEventHandler)
+        // knows this BE was already rendered and can skip it.
+        tile.lastRenderedClientFrame = FurnitureBlockEntity.clientFrameCounter;
+
         // Bind the finish atlas to Sampler3 so the fragment shader's finishGet()
         // can sample it.  Harmless when no finish is active (finish=0 → sampler
         // is never read by the shader).
